@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0d1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Till</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Archivo+Narrow:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CONFIG NOTE:
+   The colour palette, sizing and spacing are all driven by the
+   CSS variables below. Tweak here to re-skin the whole app.
+   ============================================================ */
+:root{
+  --bg:        #0b0f15;
+  --panel:     #131922;
+  --panel-2:   #1a212c;
+  --line:      #2a3441;
+  --line-soft: #222b37;
+  --text:      #eef2f7;
+  --text-dim:  #93a1b3;
+  --text-faint:#5e6b7d;
+  --accent:    #3a86ff;
+  --danger:    #e23b4e;
+  --danger-d:  #b21f30;
+  --good:      #1f9d6b;
+  --warn:      #f3a712;
+
+  --tile-radius: 12px;
+  --gap: 8px;
+  --font:  'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-c:'Archivo Narrow', 'Archivo', system-ui, sans-serif;
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%; margin:0;}
+body{
+  font-family:var(--font);
+  background:
+     radial-gradient(1200px 700px at 80% -10%, #15202e 0%, transparent 60%),
+     radial-gradient(900px 600px at -10% 110%, #161d2a 0%, transparent 55%),
+     var(--bg);
+  color:var(--text);
+  overflow:hidden;
+  -webkit-user-select:none; user-select:none;
+  touch-action:manipulation;
+}
+button{font-family:inherit; color:inherit; border:none; background:none; cursor:pointer;}
+
+/* ---------- Rotate prompt (portrait) ---------- */
+#rotate{
+  position:fixed; inset:0; z-index:9999;
+  display:none; flex-direction:column; align-items:center; justify-content:center;
+  gap:20px; background:var(--bg); text-align:center; padding:40px;
+}
+@media (orientation:portrait){ #rotate{display:flex;} #app{display:none;} }
+#rotate .ph{font-size:64px; animation:rock 2s ease-in-out infinite; transform-origin:center;}
+@keyframes rock{0%,100%{transform:rotate(0)}50%{transform:rotate(-90deg)}}
+#rotate h2{margin:0; font-weight:800; letter-spacing:.5px;}
+#rotate p{margin:0; color:var(--text-dim); max-width:340px;}
+
+/* ---------- Layout ---------- */
+#app{height:100%; display:flex; flex-direction:column;}
+
+.topbar{
+  flex:0 0 auto; height:46px; display:flex; align-items:center; gap:14px;
+  padding:0 14px; background:linear-gradient(#161d27,#10151d);
+  border-bottom:1px solid var(--line); box-shadow:0 1px 0 #000;
+}
+.brand{font-weight:800; letter-spacing:2px; font-size:15px; text-transform:uppercase;}
+.brand span{color:var(--accent);}
+.topbar .spacer{flex:1;}
+.status{display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-dim);}
+.dot{width:9px; height:9px; border-radius:50%; background:var(--text-faint);}
+.dot.local{background:var(--warn);}
+.dot.synced{background:var(--good);}
+.dot.err{background:var(--danger);}
+.iconbtn{
+  height:30px; padding:0 12px; border-radius:8px; background:var(--panel-2);
+  border:1px solid var(--line); font-size:12px; font-weight:700; color:var(--text-dim);
+  display:flex; align-items:center; gap:6px; letter-spacing:.5px;
+}
+.iconbtn:active{transform:translateY(1px);}
+
+.main{flex:1 1 auto; display:flex; min-height:0; padding:var(--gap); gap:var(--gap);}
+
+/* ===== LEFT : BILL (1/3) ===== */
+.bill{
+  flex:0 0 33.333%; display:flex; flex-direction:column; min-width:0;
+  background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden;
+}
+.bill-head{
+  flex:0 0 auto; padding:11px 14px; display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid var(--line-soft); background:var(--panel-2);
+}
+.bill-head .lbl{font-size:12px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; font-weight:700;}
+.tab-badge{
+  font-family:var(--font-c); font-weight:700; font-size:15px; padding:3px 11px; border-radius:999px;
+  background:#10202f; color:var(--accent); border:1px solid #1d3650;
+}
+.tab-badge.none{background:#20262f; color:var(--text-faint); border-color:var(--line);}
+
+.bill-list{flex:1 1 auto; overflow-y:auto; padding:6px;}
+.bill-empty{
+  height:100%; display:flex; align-items:center; justify-content:center; text-align:center;
+  color:var(--text-faint); font-size:14px; padding:30px; line-height:1.5;
+}
+.line{
+  display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px;
+  padding:9px 8px; border-radius:10px;
+}
+.line+.line{border-top:1px solid var(--line-soft);}
+.line .name{font-weight:600; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.line .each{font-size:11px; color:var(--text-faint); font-weight:600;}
+.line .total{font-family:var(--font-c); font-weight:700; font-size:16px; text-align:right;}
+.stepper{display:flex; align-items:center; gap:0; background:#0e131b; border:1px solid var(--line); border-radius:9px; overflow:hidden;}
+.stepper button{width:30px; height:32px; font-size:18px; font-weight:800; color:var(--text-dim);}
+.stepper button:active{background:#0a0e14;}
+.stepper .qty{min-width:24px; text-align:center; font-family:var(--font-c); font-weight:700; font-size:15px;}
+.stepper .minus{color:var(--danger);}
+
+.bill-total{
+  flex:0 0 auto; padding:12px 16px; border-top:1px solid var(--line);
+  display:flex; align-items:baseline; justify-content:space-between; background:var(--panel-2);
+}
+.bill-total .t{font-size:13px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; font-weight:700;}
+.bill-total .v{font-family:var(--font-c); font-size:30px; font-weight:700;}
+.bill-total .cnt{font-size:12px; color:var(--text-faint); margin-left:8px;}
+
+.tab-controls{flex:0 0 auto; padding:var(--gap); display:flex; flex-direction:column; gap:var(--gap); background:var(--panel);}
+.tab-controls .row{display:flex; gap:var(--gap);}
+.bigbtn{
+  flex:1; height:62px; border-radius:12px; font-weight:800; letter-spacing:1px; font-size:18px;
+  text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:9px;
+  border:1px solid rgba(255,255,255,.08);
+}
+.bigbtn:active{transform:translateY(2px); filter:brightness(.92);}
+.bigbtn.tab{background:linear-gradient(#2f7bf0,#235fc4); box-shadow:0 4px 0 #173e84, 0 6px 14px rgba(35,95,196,.35);}
+.bigbtn.tab:active{box-shadow:0 2px 0 #173e84;}
+.bigbtn.open{background:linear-gradient(#2a8f63,#1f7350); box-shadow:0 4px 0 #14503a, 0 6px 14px rgba(31,115,80,.3);}
+.bigbtn.open:active{box-shadow:0 2px 0 #14503a;}
+.bigbtn.clear{height:46px; font-size:14px; background:var(--panel-2); color:var(--text-dim); box-shadow:0 3px 0 #0c1118;}
+.bigbtn.clear:active{box-shadow:0 1px 0 #0c1118;}
+
+/* ===== RIGHT : MENU AREA (2/3) ===== */
+.right{flex:1 1 66.666%; display:flex; gap:var(--gap); min-width:0;}
+
+/* main grid (left of the 2/3) */
+.grid-wrap{flex:1 1 auto; display:flex; flex-direction:column; min-width:0;
+  background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden;}
+.grid-head{flex:0 0 auto; padding:10px 16px; border-bottom:1px solid var(--line-soft); background:var(--panel-2);
+  font-weight:700; letter-spacing:1px; font-size:13px; text-transform:uppercase; color:var(--text-dim);
+  display:flex; align-items:center; gap:10px;}
+.grid-head .swatch{width:12px;height:12px;border-radius:4px;}
+.grid{flex:1 1 auto; overflow-y:auto; padding:var(--gap);
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(132px,1fr)); grid-auto-rows:88px; gap:var(--gap); align-content:start;}
+.grid .placeholder{grid-column:1/-1; height:100%; display:flex; align-items:center; justify-content:center;
+  color:var(--text-faint); font-size:15px; text-align:center; padding:40px;}
+
+/* far-right top-level category sidebar */
+.cats{flex:0 0 168px; display:flex; flex-direction:column; gap:var(--gap); overflow-y:auto; padding-right:2px;}
+.cat-btn{
+  flex:0 0 auto; min-height:74px; border-radius:12px; padding:10px 12px;
+  display:flex; align-items:center; text-align:left; font-weight:800; font-size:16px; line-height:1.1;
+  color:#fff; position:relative; overflow:hidden; border:1px solid rgba(0,0,0,.25);
+  box-shadow:0 3px 0 rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18);
+  text-shadow:0 1px 2px rgba(0,0,0,.35);
+}
+.cat-btn:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18);}
+.cat-btn.active{outline:3px solid #fff; outline-offset:-3px;}
+
+/* tiles (shared by grid + modal) */
+.tile{
+  border-radius:var(--tile-radius); padding:10px 12px; color:#fff; position:relative; overflow:hidden;
+  display:flex; flex-direction:column; justify-content:space-between; text-align:left;
+  border:1px solid rgba(0,0,0,.22);
+  box-shadow:0 3px 0 rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.16);
+  text-shadow:0 1px 2px rgba(0,0,0,.3);
+}
+.tile:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.16);}
+.tile .t-name{font-weight:800; font-size:15px; line-height:1.12;}
+.tile.cat .chev{position:absolute; top:8px; right:9px; font-size:13px; opacity:.7;}
+.tile .price{align-self:flex-start; font-family:var(--font-c); font-weight:700; font-size:15px;
+  background:rgba(0,0,0,.28); padding:1px 9px; border-radius:999px; margin-top:6px;}
+.tile.flash{animation:flash .4s ease;}
+@keyframes flash{0%{box-shadow:0 0 0 0 #fff, inset 0 0 0 3px #fff;}100%{box-shadow:0 3px 0 rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.16);}}
+
+/* ===== Modal (deep category nav, keypad, open tabs) ===== */
+.overlay{position:fixed; inset:0; z-index:500; background:rgba(4,7,11,.72); backdrop-filter:blur(3px);
+  display:none; align-items:center; justify-content:center; padding:14px;}
+.overlay.show{display:flex;}
+.modal{width:min(100%,920px); max-height:100%; background:var(--panel); border:1px solid var(--line);
+  border-radius:16px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 24px 60px rgba(0,0,0,.6);}
+.modal.narrow{width:min(100%,420px);}
+.return-bar{flex:0 0 auto; display:flex; align-items:center; gap:12px; padding:10px; border-bottom:1px solid var(--line);
+  background:var(--panel-2);}
+.return-btn{flex:0 0 auto; height:54px; padding:0 22px; border-radius:11px; font-weight:800; font-size:17px;
+  text-transform:uppercase; letter-spacing:1px; color:#fff; display:flex; align-items:center; gap:10px;
+  background:linear-gradient(var(--danger),var(--danger-d)); box-shadow:0 4px 0 #7e1422;}
+.return-btn:active{transform:translateY(2px); box-shadow:0 2px 0 #7e1422;}
+.crumb{flex:1; min-width:0; font-weight:700; color:var(--text-dim); font-size:14px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.crumb b{color:var(--text);}
+.modal-grid{flex:1 1 auto; overflow-y:auto; padding:var(--gap);
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); grid-auto-rows:92px; gap:var(--gap); align-content:start;}
+
+/* keypad */
+.kp-head{padding:14px 16px 4px; text-align:center; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text-dim); font-size:13px;}
+.kp-display{margin:8px 16px 4px; height:64px; border-radius:12px; background:#0c1119; border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center; font-family:var(--font-c); font-weight:700; font-size:34px; letter-spacing:2px;}
+.kp-display .ph{color:var(--text-faint); letter-spacing:1px; font-size:18px;}
+.kp{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:12px 16px;}
+.kp button{height:56px; border-radius:11px; background:var(--panel-2); border:1px solid var(--line);
+  font-family:var(--font-c); font-size:24px; font-weight:700; box-shadow:0 3px 0 #0b0f16;}
+.kp button:active{transform:translateY(2px); box-shadow:0 1px 0 #0b0f16;}
+.kp button.del{color:var(--warn); font-size:18px;}
+.kp button.ok{background:linear-gradient(var(--good),#16573d); color:#fff; box-shadow:0 3px 0 #0c3a28; font-size:18px; font-weight:800;}
+.kp button.ok:active{box-shadow:0 1px 0 #0c3a28;}
+
+/* open tabs list */
+.tabs-list{flex:1 1 auto; overflow-y:auto; padding:var(--gap); display:flex; flex-direction:column; gap:var(--gap);}
+.tabs-empty{padding:50px 20px; text-align:center; color:var(--text-faint);}
+.tab-row{display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px;
+  background:var(--panel-2); border:1px solid var(--line);}
+.tab-row:active{filter:brightness(1.08);}
+.tab-row .num{font-family:var(--font-c); font-weight:700; font-size:26px; color:var(--accent);
+  width:60px; flex:0 0 auto;}
+.tab-row .meta{flex:1; min-width:0;}
+.tab-row .meta .tt{font-family:var(--font-c); font-weight:700; font-size:20px;}
+.tab-row .meta .ti{font-size:12px; color:var(--text-dim);}
+.tab-row .del{flex:0 0 auto; width:48px; height:48px; border-radius:10px; background:#2a1418; color:var(--danger);
+  border:1px solid #4a1f26; font-size:22px; font-weight:800;}
+.tab-row .del:active{transform:translateY(1px);}
+
+.modal-foot{flex:0 0 auto; padding:10px; border-top:1px solid var(--line); background:var(--panel-2);}
+.foot-close{width:100%; height:46px; border-radius:10px; background:var(--panel); border:1px solid var(--line);
+  color:var(--text-dim); font-weight:700; letter-spacing:1px; text-transform:uppercase; font-size:13px;}
+
+/* toast */
+#toast{position:fixed; bottom:16px; left:50%; transform:translateX(-50%) translateY(20px); opacity:0;
+  background:#0c1119; border:1px solid var(--line); padding:11px 20px; border-radius:11px; font-weight:700;
+  z-index:800; transition:.25s; box-shadow:0 10px 30px rgba(0,0,0,.5); pointer-events:none; font-size:14px;}
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-thumb{background:#2b3645; border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+</style>
+</head>
+<body>
+
+<div id="rotate">
+  <div class="ph">📱</div>
+  <h2>Please rotate to landscape</h2>
+  <p>This till is designed for landscape. Turn the tablet sideways to continue.</p>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="brand">THE <span>TILL</span></div>
+    <div class="spacer"></div>
+    <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Loading…</span></div>
+    <button class="iconbtn" id="fsBtn">⛶ Fullscreen</button>
+  </div>
+
+  <div class="main">
+    <!-- LEFT: BILL -->
+    <section class="bill">
+      <div class="bill-head">
+        <span class="lbl">Current Order</span>
+        <span class="tab-badge none" id="tabBadge">No tab</span>
+      </div>
+      <div class="bill-list" id="billList"></div>
+      <div class="bill-total">
+        <span class="t">Total</span>
+        <span><span class="v" id="billTotal">£0.00</span><span class="cnt" id="billCount"></span></span>
+      </div>
+      <div class="tab-controls">
+        <div class="row">
+          <button class="bigbtn tab" id="tabBtn">🔢 Tab</button>
+          <button class="bigbtn open" id="openBtn">📂 Open Tabs</button>
+        </div>
+        <button class="bigbtn clear" id="clearBtn">Clear Tab</button>
+      </div>
+    </section>
+
+    <!-- RIGHT: MENU -->
+    <section class="right">
+      <div class="grid-wrap">
+        <div class="grid-head" id="gridHead"><span class="swatch" id="gridSwatch" style="display:none"></span><span id="gridTitle">Menu</span></div>
+        <div class="grid" id="grid"></div>
+      </div>
+      <div class="cats" id="cats"></div>
+    </section>
+  </div>
+</div>
+
+<!-- Generic overlay reused for category modal / keypad / open tabs -->
+<div class="overlay" id="overlay"></div>
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   1. CONFIGURATION
+   ------------------------------------------------------------
+   • API_BASE: leave "" to run fully offline using the tablet's
+     own storage. Paste your Cloudflare Worker URL here to sync
+     all tabs across every device (see README.md).
+   • CURRENCY: change to "$", "€" etc. if needed.
+   ============================================================ */
+const CONFIG = {
+  API_BASE: "",                 // e.g. "https://till-api.yourname.workers.dev"
+  CURRENCY: "£",
+  MENU_URL: "menu.json"
+};
+
+/* ============================================================
+   2. STORAGE ADAPTER  (Cloudflare Worker  ||  localStorage)
+   ============================================================ */
+const LS_KEY = "till_tabs_v1";
+let backend = CONFIG.API_BASE ? "remote" : "local";
+
+const store = {
+  _ls(){ try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch { return {}; } },
+  _save(o){ localStorage.setItem(LS_KEY, JSON.stringify(o)); },
+
+  async listTabs(){
+    if (backend === "remote"){
+      const r = await fetch(CONFIG.API_BASE + "/tabs");
+      if(!r.ok) throw new Error("list failed");
+      return await r.json();
+    }
+    const o = this._ls();
+    return Object.keys(o).map(n => ({
+      number:n, items:o[n].items, updatedAt:o[n].updatedAt,
+      total:(o[n].items||[]).reduce((s,i)=>s+i.price*i.qty,0)
+    })).sort((a,b)=>(""+a.number).localeCompare(""+b.number,undefined,{numeric:true}));
+  },
+  async getTab(number){
+    if (backend === "remote"){
+      const r = await fetch(CONFIG.API_BASE + "/tabs/" + encodeURIComponent(number));
+      if(r.status===404) return null;
+      if(!r.ok) throw new Error("get failed");
+      return await r.json();
+    }
+    const o = this._ls();
+    return o[number] ? {number, items:o[number].items} : null;
+  },
+  async saveTab(number, items){
+    if (backend === "remote"){
+      const r = await fetch(CONFIG.API_BASE + "/tabs/" + encodeURIComponent(number), {
+        method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify({items})
+      });
+      if(!r.ok) throw new Error("save failed");
+      return;
+    }
+    const o = this._ls(); o[number] = {items, updatedAt:Date.now()}; this._save(o);
+  },
+  async deleteTab(number){
+    if (backend === "remote"){
+      const r = await fetch(CONFIG.API_BASE + "/tabs/" + encodeURIComponent(number), {method:"DELETE"});
+      if(!r.ok && r.status!==404) throw new Error("delete failed");
+      return;
+    }
+    const o = this._ls(); delete o[number]; this._save(o);
+  }
+};
+
+/* ============================================================
+   3. STATE
+   ============================================================ */
+let MENU = null;
+let topCats = [];
+let activeTopIndex = 0;
+let order = [];          // [{id,name,price,qty}]
+let activeTab = null;    // string | null
+let saveTimer = null;
+
+/* ============================================================
+   4. MENU LOADING + NORMALISATION
+   An "item" is any node that has a numeric `price`.
+   A "category" is any node with a `children` array.
+   Colours: use node.color, else inherit parent, else palette.
+   ============================================================ */
+const PALETTE = ["#e4572e","#f3a712","#2d9d78","#3a86ff","#8338ec","#d81159",
+                 "#0fa3b1","#6a994e","#bc4749","#ff6b35","#118ab2","#9b5de5"];
+function hashColor(name){
+  let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0;
+  return PALETTE[h % PALETTE.length];
+}
+function normalise(node, path, inheritedColor){
+  node._path = path;
+  node._isItem = (typeof node.price === "number");
+  node._color = node.color || (node._isItem ? inheritedColor : hashColor(node.name||path));
+  if (Array.isArray(node.children))
+    node.children.forEach(c => normalise(c, path + " / " + c.name, node._color));
+  return node;
+}
+
+const DEFAULT_MENU = {
+  "name":"Menu",
+  "children":[
+    {"name":"Draught","color":"#3a86ff","children":[
+      {"name":"Lager","children":[
+        {"name":"Carling","price":4.60},{"name":"Stella Artois","price":5.20},
+        {"name":"Madri","price":5.40},{"name":"Camden Hells","price":5.80}
+      ]},
+      {"name":"Ale & Cider","children":[
+        {"name":"Guinness","price":5.30},{"name":"Doom Bar","price":4.90},
+        {"name":"Aspall Cider","price":5.10},{"name":"Inch's","price":4.80}
+      ]}
+    ]},
+    {"name":"Wine","color":"#8338ec","children":[
+      {"name":"Red","children":[
+        {"name":"Merlot 175ml","price":5.50},{"name":"Malbec 175ml","price":6.20},
+        {"name":"Merlot Bottle","price":21.00}
+      ]},
+      {"name":"White","children":[
+        {"name":"Pinot Grigio 175ml","price":5.40},{"name":"Sauv Blanc 175ml","price":6.00}
+      ]},
+      {"name":"Rosé 175ml","price":5.40},
+      {"name":"Prosecco 125ml","price":6.50}
+    ]},
+    {"name":"Spirits","color":"#0fa3b1","children":[
+      {"name":"Vodka","children":[
+        {"name":"House Vodka","price":3.80},{"name":"Grey Goose","price":5.50}
+      ]},
+      {"name":"Gin","children":[
+        {"name":"Gordon's","price":3.90},{"name":"Tanqueray","price":4.60},{"name":"Hendrick's","price":5.20}
+      ]},
+      {"name":"Whisky","children":[
+        {"name":"Famous Grouse","price":3.90},{"name":"Jack Daniel's","price":4.60}
+      ]}
+    ]},
+    {"name":"Soft Drinks","color":"#2d9d78","children":[
+      {"name":"Coca-Cola","price":2.80},{"name":"Diet Coke","price":2.80},
+      {"name":"Lemonade","price":2.60},{"name":"J2O","price":3.20},
+      {"name":"Still Water","price":2.20},{"name":"Sparkling Water","price":2.20}
+    ]},
+    {"name":"Food","color":"#e4572e","children":[
+      {"name":"Burgers","children":[
+        {"name":"Classic Beef","price":12.50},{"name":"Bacon Cheese","price":13.95},
+        {"name":"Halloumi","price":11.50}
+      ]},
+      {"name":"Mains","children":[
+        {"name":"Fish & Chips","price":14.50},{"name":"Bangers & Mash","price":12.95},
+        {"name":"Scampi","price":13.50}
+      ]},
+      {"name":"Sides","children":[
+        {"name":"Chips","price":4.00},{"name":"Onion Rings","price":4.50},{"name":"Side Salad","price":3.50}
+      ]}
+    ]},
+    {"name":"Hot Drinks","color":"#bc4749","children":[
+      {"name":"Americano","price":3.20},{"name":"Latte","price":3.50},
+      {"name":"Cappuccino","price":3.50},{"name":"Tea","price":2.80}
+    ]}
+  ]
+};
+
+async function loadMenu(){
+  let data = null;
+  try{
+    const r = await fetch(CONFIG.MENU_URL, {cache:"no-store"});
+    if(r.ok) data = await r.json();
+  }catch(e){ /* fall back below */ }
+  if(!data || !Array.isArray(data.children)) data = DEFAULT_MENU;
+  MENU = normalise(data, data.name || "Menu", "#3a86ff");
+  topCats = MENU.children;
+}
+
+/* ============================================================
+   5. RENDER : money helpers
+   ============================================================ */
+const money = n => CONFIG.CURRENCY + (Math.round(n*100)/100).toFixed(2);
+
+/* ----- top-level category sidebar (far right) ----- */
+function renderCats(){
+  const el = document.getElementById("cats");
+  el.innerHTML = "";
+  topCats.forEach((c,i)=>{
+    const b = document.createElement("button");
+    b.className = "cat-btn" + (i===activeTopIndex?" active":"");
+    b.style.background = `linear-gradient(160deg, ${tint(c._color,18)}, ${c._color})`;
+    b.textContent = c.name;
+    b.onclick = ()=>{ activeTopIndex=i; renderCats(); renderGrid(); };
+    el.appendChild(b);
+  });
+}
+
+/* ----- main grid : children of active top category ----- */
+function renderGrid(){
+  const cat = topCats[activeTopIndex];
+  document.getElementById("gridTitle").textContent = cat ? cat.name : "Menu";
+  const sw = document.getElementById("gridSwatch");
+  if(cat){ sw.style.display="inline-block"; sw.style.background=cat._color; } else sw.style.display="none";
+  const g = document.getElementById("grid"); g.innerHTML="";
+  if(!cat || !cat.children?.length){
+    g.innerHTML = '<div class="placeholder">Pick a category on the right to get started.</div>'; return;
+  }
+  cat.children.forEach(node => g.appendChild(makeTile(node, ()=>{
+    if(node._isItem) addItem(node);
+    else openCategory(node);
+  })));
+}
+
+/* a tile is either a category (chevron, opens) or an item (price, adds) */
+function makeTile(node, onClick){
+  const t = document.createElement("button");
+  t.className = "tile " + (node._isItem ? "item" : "cat");
+  t.style.background = `linear-gradient(160deg, ${tint(node._color,16)}, ${node._color})`;
+  const name = document.createElement("div"); name.className="t-name"; name.textContent=node.name; t.appendChild(name);
+  if(node._isItem){
+    const p=document.createElement("div"); p.className="price"; p.textContent=money(node.price); t.appendChild(p);
+  } else {
+    const ch=document.createElement("div"); ch.className="chev"; ch.textContent="›"; t.appendChild(ch);
+  }
+  t.onclick = ()=>{ if(node._isItem){ t.classList.remove("flash"); void t.offsetWidth; t.classList.add("flash"); } onClick(); };
+  return t;
+}
+
+/* lighten a hex colour by pct for the gradient top */
+function tint(hex, pct){
+  const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255;
+  r=Math.min(255,r+Math.round(255*pct/100)); g=Math.min(255,g+Math.round(255*pct/100)); b=Math.min(255,b+Math.round(255*pct/100));
+  return `rgb(${r},${g},${b})`;
+}
+
+/* ============================================================
+   6. CATEGORY MODAL (deep nesting + red return button)
+   navStack holds the chain of categories we've drilled into.
+   ============================================================ */
+let navStack = [];
+function openCategory(node){ navStack=[node]; renderModal(); showOverlay(); }
+function modalBack(){ navStack.pop(); if(navStack.length===0) hideOverlay(); else renderModal(); }
+function renderModal(){
+  const cur = navStack[navStack.length-1];
+  const crumb = navStack.map(n=>n.name).join(" › ");
+  const ov = document.getElementById("overlay");
+  ov.innerHTML = `
+    <div class="modal">
+      <div class="return-bar">
+        <button class="return-btn" id="retBtn">⟵ Return</button>
+        <div class="crumb"><b>${esc(cur.name)}</b>${navStack.length>1 ? " — "+esc(crumb) : ""}</div>
+      </div>
+      <div class="modal-grid" id="modalGrid"></div>
+    </div>`;
+  ov.querySelector("#retBtn").onclick = modalBack;
+  const mg = ov.querySelector("#modalGrid");
+  (cur.children||[]).forEach(node => mg.appendChild(makeTile(node, ()=>{
+    if(node._isItem) addItem(node);
+    else { navStack.push(node); renderModal(); }
+  })));
+}
+
+/* ============================================================
+   7. BILL / ORDER
+   ============================================================ */
+function addItem(node){
+  const line = order.find(o=>o.id===node._path);
+  if(line) line.qty++;
+  else order.push({id:node._path, name:node.name, price:node.price, qty:1});
+  renderBill(); scheduleSave(); toast(node.name+" added");
+}
+function changeQty(id, delta){
+  const line = order.find(o=>o.id===id); if(!line) return;
+  line.qty += delta;
+  if(line.qty<=0) order = order.filter(o=>o.id!==id);
+  renderBill(); scheduleSave();
+}
+function renderBill(){
+  const list = document.getElementById("billList");
+  if(order.length===0){
+    list.innerHTML = '<div class="bill-empty">No items yet.<br>Tap the menu to add to this order.</div>';
+  } else {
+    list.innerHTML = "";
+    order.forEach(o=>{
+      const row=document.createElement("div"); row.className="line";
+      row.innerHTML = `
+        <div class="stepper">
+          <button class="minus">–</button><span class="qty">${o.qty}</span><button class="plus">+</button>
+        </div>
+        <div><div class="name">${esc(o.name)}</div><div class="each">${money(o.price)} each</div></div>
+        <div class="total">${money(o.price*o.qty)}</div>`;
+      row.querySelector(".minus").onclick=()=>changeQty(o.id,-1);
+      row.querySelector(".plus").onclick=()=>changeQty(o.id,1);
+      list.appendChild(row);
+    });
+  }
+  const total = order.reduce((s,o)=>s+o.price*o.qty,0);
+  const count = order.reduce((s,o)=>s+o.qty,0);
+  document.getElementById("billTotal").textContent = money(total);
+  document.getElementById("billCount").textContent = count ? `· ${count} item${count>1?"s":""}` : "";
+  const badge=document.getElementById("tabBadge");
+  if(activeTab){ badge.textContent="Tab "+activeTab; badge.className="tab-badge"; }
+  else { badge.textContent="No tab"; badge.className="tab-badge none"; }
+}
+
+/* save active tab (debounced) */
+function scheduleSave(){
+  if(activeTab===null) return;
+  setStatus("saving");
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{ await store.saveTab(activeTab, order); setStatus("ok"); }
+    catch(e){ setStatus("err"); toast("Save failed — check connection"); }
+  }, 500);
+}
+
+/* ============================================================
+   8. TAB ACTIONS  (keypad / open tabs / clear)
+   ============================================================ */
+let kpValue = "";
+function openKeypad(){
+  kpValue="";
+  const ov=document.getElementById("overlay");
+  ov.innerHTML = `
+    <div class="modal narrow">
+      <div class="kp-head">Enter tab number</div>
+      <div class="kp-display" id="kpDisp"><span class="ph">– –</span></div>
+      <div class="kp" id="kp"></div>
+      <div class="modal-foot"><button class="foot-close" id="kpCancel">Cancel</button></div>
+    </div>`;
+  const kp=ov.querySelector("#kp");
+  ["1","2","3","4","5","6","7","8","9","del","0","ok"].forEach(k=>{
+    const b=document.createElement("button");
+    if(k==="del"){ b.className="del"; b.textContent="⌫"; }
+    else if(k==="ok"){ b.className="ok"; b.textContent="GO"; }
+    else b.textContent=k;
+    b.onclick=()=>kpPress(k);
+    kp.appendChild(b);
+  });
+  ov.querySelector("#kpCancel").onclick=hideOverlay;
+  showOverlay();
+}
+function kpPress(k){
+  if(k==="del") kpValue=kpValue.slice(0,-1);
+  else if(k==="ok"){ if(kpValue) selectTab(kpValue); return; }
+  else if(kpValue.length<6) kpValue+=k;
+  const d=document.getElementById("kpDisp");
+  d.innerHTML = kpValue ? esc(kpValue) : '<span class="ph">– –</span>';
+}
+
+/* choose / create a tab */
+async function selectTab(number){
+  hideOverlay(); setStatus("saving");
+  try{
+    const existing = await store.getTab(number);
+    if(existing && existing.items && existing.items.length){
+      order = existing.items.map(i=>({...i}));   // load existing tab
+      toast("Tab "+number+" loaded");
+    } else {
+      await store.saveTab(number, order);          // new tab seeded with current order
+      toast("Tab "+number+" started");
+    }
+    activeTab = number;
+    renderBill(); setStatus("ok");
+  }catch(e){ setStatus("err"); toast("Couldn't open tab — check connection"); }
+}
+
+async function openTabs(){
+  const ov=document.getElementById("overlay");
+  ov.innerHTML = `
+    <div class="modal">
+      <div class="return-bar">
+        <button class="return-btn" id="otClose">⟵ Return</button>
+        <div class="crumb"><b>Open Tabs</b></div>
+      </div>
+      <div class="tabs-list" id="tabsList"><div class="tabs-empty">Loading…</div></div>
+    </div>`;
+  ov.querySelector("#otClose").onclick=hideOverlay;
+  showOverlay();
+  let tabs=[];
+  try{ tabs = await store.listTabs(); }
+  catch(e){ ov.querySelector("#tabsList").innerHTML='<div class="tabs-empty">Couldn\'t load tabs.<br>Check your connection.</div>'; return; }
+  const list=ov.querySelector("#tabsList");
+  if(!tabs.length){ list.innerHTML='<div class="tabs-empty">No open tabs.<br>Start one with the Tab button.</div>'; return; }
+  list.innerHTML="";
+  tabs.forEach(t=>{
+    const count=(t.items||[]).reduce((s,i)=>s+i.qty,0);
+    const row=document.createElement("div"); row.className="tab-row";
+    row.innerHTML = `
+      <div class="num">${esc(""+t.number)}</div>
+      <div class="meta"><div class="tt">${money(t.total||0)}</div><div class="ti">${count} item${count!==1?"s":""}</div></div>
+      <button class="del">✕</button>`;
+    row.querySelector(".meta").onclick = ()=>loadTab(t.number);
+    row.querySelector(".num").onclick  = ()=>loadTab(t.number);
+    row.querySelector(".del").onclick  = async (e)=>{
+      e.stopPropagation();
+      if(!confirm("Close tab "+t.number+"? This removes it.")) return;
+      try{ await store.deleteTab(t.number); if(activeTab===t.number){activeTab=null; order=[]; renderBill();} openTabs(); }
+      catch(err){ toast("Delete failed"); }
+    };
+    list.appendChild(row);
+  });
+}
+async function loadTab(number){
+  hideOverlay();
+  try{
+    const t = await store.getTab(number);
+    order = (t?.items||[]).map(i=>({...i}));
+    activeTab = number; renderBill(); setStatus("ok"); toast("Tab "+number+" loaded");
+  }catch(e){ setStatus("err"); toast("Couldn't load tab"); }
+}
+
+function clearTab(){
+  if(activeTab!==null){
+    if(!confirm("Clear tab "+activeTab+"? This empties and closes it.")) return;
+    store.deleteTab(activeTab).catch(()=>{});
+  } else if(order.length){
+    if(!confirm("Clear the current order?")) return;
+  }
+  activeTab=null; order=[]; renderBill(); setStatus("ok");
+}
+
+/* ============================================================
+   9. UI PLUMBING
+   ============================================================ */
+function esc(s){ return (""+s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function showOverlay(){ document.getElementById("overlay").classList.add("show"); }
+function hideOverlay(){ const o=document.getElementById("overlay"); o.classList.remove("show"); o.innerHTML=""; navStack=[]; }
+document.getElementById("overlay").addEventListener("click",e=>{ if(e.target.id==="overlay") hideOverlay(); });
+
+let toastTimer=null;
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),1400); }
+
+function setStatus(s){
+  const dot=document.getElementById("statusDot"), txt=document.getElementById("statusText");
+  if(s==="ok"){ dot.className="dot "+(backend==="remote"?"synced":"local"); txt.textContent=(backend==="remote"?"Synced":"On-device"); }
+  else if(s==="saving"){ dot.className="dot"; txt.textContent="Saving…"; }
+  else if(s==="err"){ dot.className="dot err"; txt.textContent="Offline"; }
+}
+
+/* fullscreen + landscape lock (best-effort; full lock needs PWA/kiosk) */
+document.getElementById("fsBtn").onclick = async ()=>{
+  try{ if(!document.fullscreenElement) await document.documentElement.requestFullscreen(); else await document.exitFullscreen(); }catch(e){}
+  try{ await screen.orientation.lock("landscape"); }catch(e){}
+};
+
+/* ============================================================
+   10. INIT
+   ============================================================ */
+async function init(){
+  document.getElementById("tabBtn").onclick   = openKeypad;
+  document.getElementById("openBtn").onclick  = openTabs;
+  document.getElementById("clearBtn").onclick = clearTab;
+  setStatus("saving");
+  await loadMenu();
+  renderCats(); renderGrid(); renderBill();
+  setStatus("ok");
+  if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("sw.js"); }catch(e){} }
+}
+init();
+</script>
+</body>
+</html>
