@@ -10,7 +10,8 @@ backend at all.
 | File            | What it is                                                        |
 |-----------------|-------------------------------------------------------------------|
 | `index.html`    | The whole app (HTML + CSS + JS). This is what runs on the tablet. |
-| `menu.json`     | **Your menu.** Edit this to change categories/items/prices.       |
+| `data.js`       | **Your menu** (the `MENUS` format with icons, choices, dietary, prices). The app reads this first. |
+| `menu.json`     | Optional simpler menu format — only used if `data.js` is missing. |
 | `manifest.json` | PWA manifest — makes it install fullscreen + landscape-locked.    |
 | `sw.js`         | Service worker so the till still opens if Wi-Fi drops.            |
 | `worker.js`     | Cloudflare Worker (the sync API). Only needed if you want sync.   |
@@ -21,8 +22,9 @@ backend at all.
 ## 1. Quick start (no backend, works immediately)
 
 1. Create a new GitHub repo (public is fine), e.g. `till`.
-2. Upload `index.html`, `menu.json`, `manifest.json`, `sw.js` and two icons
-   (`icon-192.png`, `icon-512.png` — any square logo will do).
+2. Upload `index.html`, `data.js`, `manifest.json`, `sw.js` and two icons
+   (`icon-192.png`, `icon-512.png` — any square logo will do). (`menu.json` is
+   only a fallback; you can skip it.)
 3. Repo **Settings → Pages → Build and deployment → Deploy from a branch**,
    pick `main` / `/ (root)`, Save.
 4. After a minute your app is live at `https://<you>.github.io/till/`.
@@ -96,32 +98,47 @@ then redeploy.
 
 ---
 
-## 3. Editing the menu
+## 3. Editing the menu (`data.js`)
 
-Open `menu.json`. The rule is simple:
+`data.js` holds a `MENUS` object. The app turns it into the till automatically:
 
-- A **category** has a `"children"` array.
-- An **item** has a `"price"` (a number) and no children.
-- Nest `children` as deep as you want — the app keeps drilling until it reaches
-  priced items.
-- Only the **top-level** entries appear on the far-right sidebar. `"color"` is
-  optional (a hex value like `"#3a86ff"`); it mainly matters at the top level.
+- Each **top-level** key (Drinks, Food, …) is a category on the right sidebar.
+  Its `icon` shows on the button.
+- `sections` → `subsections` give you the drill-down levels. You can have a
+  section with `subsections`, or a section that lists items directly.
+- An **item** is the deepest level. It can carry any of:
+  - `price` (a number). Items with no price still add to the order, but the
+    running total only sums the ones that have a price (the till shows a note).
+  - `choices` — e.g. `{ Size: ["Regular","Pint"], Ice: ["Ice","No Ice"] }`.
+    Tapping the item opens a picker so staff choose one of each before it's added.
+  - `dietary` — e.g. `["V","GF"]`, shown as little badges.
+  - `scoopBuilder` — `{ maxScoops: 4, flavours: [...] }` for build-your-own ice
+    cream; price is charged per scoop.
 
-```json
-{
-  "name": "Menu",
-  "children": [
-    { "name": "Spirits", "color": "#0fa3b1", "children": [
-        { "name": "Gin", "children": [
-            { "name": "Gordon's", "price": 3.90 }
-        ]}
-    ]}
-  ]
-}
+```js
+const MENUS = {
+  Drinks: {
+    icon: "🍷",
+    sections: {
+      "Soft Drinks": {
+        subsections: {
+          Common: {
+            Lemonade: { choices: { Size: ["Regular","Pint"], Ice: ["Ice","No Ice"] } }
+          }
+        }
+      }
+    }
+  }
+};
 ```
 
-Save, re-upload, refresh. (If you installed it as an app and don't see changes,
-fully close and reopen it — the service worker fetches fresh when online.)
+Save, re-upload `data.js`, refresh. (If installed as an app and you don't see
+changes, fully close and reopen it — it fetches fresh when online.)
+
+> **Heads-up on prices:** in the menu you sent, the food items have prices but
+> the drinks don't. The till will let staff add drinks and record the size/ice/
+> flavour, but those lines show "no price set" and don't add to the total. Add a
+> `price:` to any drink and it starts counting automatically.
 
 ---
 

@@ -4,7 +4,7 @@
    signal, but the till still opens if the Wi-Fi drops.
    Bump CACHE if you change files and want to force a refresh. */
 const CACHE = "till-v1";
-const SHELL = ["./", "index.html", "menu.json", "manifest.json"];
+const SHELL = ["./", "index.html", "data.js", "menu.json", "manifest.json"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

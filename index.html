@@ -1,312 +1,1106 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0d1117">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>Till</title>
-<link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Archivo+Narrow:wght@600;700&display=swap" rel="stylesheet">
-<style>
-/* ============================================================
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0d1117" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Till</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Archivo+Narrow:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ============================================================
    CONFIG NOTE:
    The colour palette, sizing and spacing are all driven by the
    CSS variables below. Tweak here to re-skin the whole app.
    ============================================================ */
-:root{
-  --bg:        #0b0f15;
-  --panel:     #131922;
-  --panel-2:   #1a212c;
-  --line:      #2a3441;
-  --line-soft: #222b37;
-  --text:      #eef2f7;
-  --text-dim:  #93a1b3;
-  --text-faint:#5e6b7d;
-  --accent:    #3a86ff;
-  --danger:    #e23b4e;
-  --danger-d:  #b21f30;
-  --good:      #1f9d6b;
-  --warn:      #f3a712;
+      :root {
+        --bg: #0b0f15;
+        --panel: #131922;
+        --panel-2: #1a212c;
+        --line: #2a3441;
+        --line-soft: #222b37;
+        --text: #eef2f7;
+        --text-dim: #93a1b3;
+        --text-faint: #5e6b7d;
+        --accent: #3a86ff;
+        --danger: #e23b4e;
+        --danger-d: #b21f30;
+        --good: #1f9d6b;
+        --warn: #f3a712;
 
-  --tile-radius: 12px;
-  --gap: 8px;
-  --font:  'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-c:'Archivo Narrow', 'Archivo', system-ui, sans-serif;
-}
+        --tile-radius: 12px;
+        --gap: 8px;
+        --font:
+          "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        --font-c: "Archivo Narrow", "Archivo", system-ui, sans-serif;
+      }
 
-*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-html,body{height:100%; margin:0;}
-body{
-  font-family:var(--font);
-  background:
-     radial-gradient(1200px 700px at 80% -10%, #15202e 0%, transparent 60%),
-     radial-gradient(900px 600px at -10% 110%, #161d2a 0%, transparent 55%),
-     var(--bg);
-  color:var(--text);
-  overflow:hidden;
-  -webkit-user-select:none; user-select:none;
-  touch-action:manipulation;
-}
-button{font-family:inherit; color:inherit; border:none; background:none; cursor:pointer;}
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        font-family: var(--font);
+        background:
+          radial-gradient(
+            1200px 700px at 80% -10%,
+            #15202e 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            900px 600px at -10% 110%,
+            #161d2a 0%,
+            transparent 55%
+          ),
+          var(--bg);
+        color: var(--text);
+        overflow: hidden;
+        -webkit-user-select: none;
+        user-select: none;
+        touch-action: manipulation;
+      }
+      button {
+        font-family: inherit;
+        color: inherit;
+        border: none;
+        background: none;
+        cursor: pointer;
+      }
 
-/* ---------- Rotate prompt (portrait) ---------- */
-#rotate{
-  position:fixed; inset:0; z-index:9999;
-  display:none; flex-direction:column; align-items:center; justify-content:center;
-  gap:20px; background:var(--bg); text-align:center; padding:40px;
-}
-@media (orientation:portrait){ #rotate{display:flex;} #app{display:none;} }
-#rotate .ph{font-size:64px; animation:rock 2s ease-in-out infinite; transform-origin:center;}
-@keyframes rock{0%,100%{transform:rotate(0)}50%{transform:rotate(-90deg)}}
-#rotate h2{margin:0; font-weight:800; letter-spacing:.5px;}
-#rotate p{margin:0; color:var(--text-dim); max-width:340px;}
+      /* ---------- Rotate prompt (portrait) ---------- */
+      #rotate {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        background: var(--bg);
+        text-align: center;
+        padding: 40px;
+      }
+      @media (orientation: portrait) {
+        #rotate {
+          display: flex;
+        }
+        #app {
+          display: none;
+        }
+      }
+      #rotate .ph {
+        font-size: 64px;
+        animation: rock 2s ease-in-out infinite;
+        transform-origin: center;
+      }
+      @keyframes rock {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        50% {
+          transform: rotate(-90deg);
+        }
+      }
+      #rotate h2 {
+        margin: 0;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+      }
+      #rotate p {
+        margin: 0;
+        color: var(--text-dim);
+        max-width: 340px;
+      }
 
-/* ---------- Layout ---------- */
-#app{height:100%; display:flex; flex-direction:column;}
+      /* ---------- Layout ---------- */
+      #app {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
 
-.topbar{
-  flex:0 0 auto; height:46px; display:flex; align-items:center; gap:14px;
-  padding:0 14px; background:linear-gradient(#161d27,#10151d);
-  border-bottom:1px solid var(--line); box-shadow:0 1px 0 #000;
-}
-.brand{font-weight:800; letter-spacing:2px; font-size:15px; text-transform:uppercase;}
-.brand span{color:var(--accent);}
-.topbar .spacer{flex:1;}
-.status{display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-dim);}
-.dot{width:9px; height:9px; border-radius:50%; background:var(--text-faint);}
-.dot.local{background:var(--warn);}
-.dot.synced{background:var(--good);}
-.dot.err{background:var(--danger);}
-.iconbtn{
-  height:30px; padding:0 12px; border-radius:8px; background:var(--panel-2);
-  border:1px solid var(--line); font-size:12px; font-weight:700; color:var(--text-dim);
-  display:flex; align-items:center; gap:6px; letter-spacing:.5px;
-}
-.iconbtn:active{transform:translateY(1px);}
+      .topbar {
+        flex: 0 0 auto;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 0 14px;
+        background: linear-gradient(#161d27, #10151d);
+        border-bottom: 1px solid var(--line);
+        box-shadow: 0 1px 0 #000;
+      }
+      .brand {
+        font-weight: 800;
+        letter-spacing: 2px;
+        font-size: 15px;
+        text-transform: uppercase;
+      }
+      .brand span {
+        color: var(--accent);
+      }
+      .topbar .spacer {
+        flex: 1;
+      }
+      .status {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12px;
+        color: var(--text-dim);
+      }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--text-faint);
+      }
+      .dot.local {
+        background: var(--warn);
+      }
+      .dot.synced {
+        background: var(--good);
+      }
+      .dot.err {
+        background: var(--danger);
+      }
+      .iconbtn {
+        height: 30px;
+        padding: 0 12px;
+        border-radius: 8px;
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-dim);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        letter-spacing: 0.5px;
+      }
+      .iconbtn:active {
+        transform: translateY(1px);
+      }
 
-.main{flex:1 1 auto; display:flex; min-height:0; padding:var(--gap); gap:var(--gap);}
+      .main {
+        flex: 1 1 auto;
+        display: flex;
+        min-height: 0;
+        padding: var(--gap);
+        gap: var(--gap);
+      }
 
-/* ===== LEFT : BILL (1/3) ===== */
-.bill{
-  flex:0 0 33.333%; display:flex; flex-direction:column; min-width:0;
-  background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden;
-}
-.bill-head{
-  flex:0 0 auto; padding:11px 14px; display:flex; align-items:center; justify-content:space-between;
-  border-bottom:1px solid var(--line-soft); background:var(--panel-2);
-}
-.bill-head .lbl{font-size:12px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; font-weight:700;}
-.tab-badge{
-  font-family:var(--font-c); font-weight:700; font-size:15px; padding:3px 11px; border-radius:999px;
-  background:#10202f; color:var(--accent); border:1px solid #1d3650;
-}
-.tab-badge.none{background:#20262f; color:var(--text-faint); border-color:var(--line);}
+      /* ===== LEFT : BILL (1/3) ===== */
+      .bill {
+        flex: 0 0 33.333%;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .bill-head {
+        flex: 0 0 auto;
+        padding: 11px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line-soft);
+        background: var(--panel-2);
+      }
+      .bill-head .lbl {
+        font-size: 12px;
+        letter-spacing: 1.5px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .tab-badge {
+        font-family: var(--font-c);
+        font-weight: 700;
+        font-size: 15px;
+        padding: 3px 11px;
+        border-radius: 999px;
+        background: #10202f;
+        color: var(--accent);
+        border: 1px solid #1d3650;
+      }
+      .tab-badge.none {
+        background: #20262f;
+        color: var(--text-faint);
+        border-color: var(--line);
+      }
 
-.bill-list{flex:1 1 auto; overflow-y:auto; padding:6px;}
-.bill-empty{
-  height:100%; display:flex; align-items:center; justify-content:center; text-align:center;
-  color:var(--text-faint); font-size:14px; padding:30px; line-height:1.5;
-}
-.line{
-  display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px;
-  padding:9px 8px; border-radius:10px;
-}
-.line+.line{border-top:1px solid var(--line-soft);}
-.line .name{font-weight:600; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-.line .each{font-size:11px; color:var(--text-faint); font-weight:600;}
-.line .total{font-family:var(--font-c); font-weight:700; font-size:16px; text-align:right;}
-.stepper{display:flex; align-items:center; gap:0; background:#0e131b; border:1px solid var(--line); border-radius:9px; overflow:hidden;}
-.stepper button{width:30px; height:32px; font-size:18px; font-weight:800; color:var(--text-dim);}
-.stepper button:active{background:#0a0e14;}
-.stepper .qty{min-width:24px; text-align:center; font-family:var(--font-c); font-weight:700; font-size:15px;}
-.stepper .minus{color:var(--danger);}
+      .bill-list {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: 6px;
+      }
+      .bill-empty {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: var(--text-faint);
+        font-size: 14px;
+        padding: 30px;
+        line-height: 1.5;
+      }
+      .line {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 8px;
+        border-radius: 10px;
+      }
+      .line + .line {
+        border-top: 1px solid var(--line-soft);
+      }
+      .line .name {
+        font-weight: 600;
+        font-size: 15px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .line .each {
+        font-size: 11px;
+        color: var(--text-faint);
+        font-weight: 600;
+      }
+      .line .total {
+        font-family: var(--font-c);
+        font-weight: 700;
+        font-size: 16px;
+        text-align: right;
+      }
+      .stepper {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        background: #0e131b;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        overflow: hidden;
+      }
+      .stepper button {
+        width: 30px;
+        height: 32px;
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--text-dim);
+      }
+      .stepper button:active {
+        background: #0a0e14;
+      }
+      .stepper .qty {
+        min-width: 24px;
+        text-align: center;
+        font-family: var(--font-c);
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .stepper .minus {
+        color: var(--danger);
+      }
 
-.bill-total{
-  flex:0 0 auto; padding:12px 16px; border-top:1px solid var(--line);
-  display:flex; align-items:baseline; justify-content:space-between; background:var(--panel-2);
-}
-.bill-total .t{font-size:13px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; font-weight:700;}
-.bill-total .v{font-family:var(--font-c); font-size:30px; font-weight:700;}
-.bill-total .cnt{font-size:12px; color:var(--text-faint); margin-left:8px;}
+      .bill-total {
+        flex: 0 0 auto;
+        padding: 12px 16px;
+        border-top: 1px solid var(--line);
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        background: var(--panel-2);
+      }
+      .bill-total .t {
+        font-size: 13px;
+        letter-spacing: 1.5px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .bill-total .v {
+        font-family: var(--font-c);
+        font-size: 30px;
+        font-weight: 700;
+      }
+      .bill-total .cnt {
+        font-size: 12px;
+        color: var(--text-faint);
+        margin-left: 8px;
+      }
 
-.tab-controls{flex:0 0 auto; padding:var(--gap); display:flex; flex-direction:column; gap:var(--gap); background:var(--panel);}
-.tab-controls .row{display:flex; gap:var(--gap);}
-.bigbtn{
-  flex:1; height:62px; border-radius:12px; font-weight:800; letter-spacing:1px; font-size:18px;
-  text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:9px;
-  border:1px solid rgba(255,255,255,.08);
-}
-.bigbtn:active{transform:translateY(2px); filter:brightness(.92);}
-.bigbtn.tab{background:linear-gradient(#2f7bf0,#235fc4); box-shadow:0 4px 0 #173e84, 0 6px 14px rgba(35,95,196,.35);}
-.bigbtn.tab:active{box-shadow:0 2px 0 #173e84;}
-.bigbtn.open{background:linear-gradient(#2a8f63,#1f7350); box-shadow:0 4px 0 #14503a, 0 6px 14px rgba(31,115,80,.3);}
-.bigbtn.open:active{box-shadow:0 2px 0 #14503a;}
-.bigbtn.clear{height:46px; font-size:14px; background:var(--panel-2); color:var(--text-dim); box-shadow:0 3px 0 #0c1118;}
-.bigbtn.clear:active{box-shadow:0 1px 0 #0c1118;}
+      .tab-controls {
+        flex: 0 0 auto;
+        padding: var(--gap);
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap);
+        background: var(--panel);
+      }
+      .tab-controls .row {
+        display: flex;
+        gap: var(--gap);
+      }
+      .bigbtn {
+        flex: 1;
+        height: 62px;
+        border-radius: 12px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        font-size: 18px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .bigbtn:active {
+        transform: translateY(2px);
+        filter: brightness(0.92);
+      }
+      .bigbtn.tab {
+        background: linear-gradient(#2f7bf0, #235fc4);
+        box-shadow:
+          0 4px 0 #173e84,
+          0 6px 14px rgba(35, 95, 196, 0.35);
+      }
+      .bigbtn.tab:active {
+        box-shadow: 0 2px 0 #173e84;
+      }
+      .bigbtn.open {
+        background: linear-gradient(#2a8f63, #1f7350);
+        box-shadow:
+          0 4px 0 #14503a,
+          0 6px 14px rgba(31, 115, 80, 0.3);
+      }
+      .bigbtn.open:active {
+        box-shadow: 0 2px 0 #14503a;
+      }
+      .bigbtn.clear {
+        height: 52px;
+        font-size: 14px;
+        background: var(--panel-2);
+        color: var(--text-dim);
+        box-shadow: 0 3px 0 #0c1118;
+      }
+      .bigbtn.clear:active {
+        box-shadow: 0 1px 0 #0c1118;
+      }
+      .bigbtn.save {
+        height: 52px;
+        font-size: 16px;
+        background: var(--panel-2);
+        color: var(--text-dim);
+        border: 1px solid var(--line);
+        box-shadow: 0 3px 0 #0c1118;
+      }
+      .bigbtn.save:active {
+        box-shadow: 0 1px 0 #0c1118;
+      }
+      .bigbtn.save.dirty {
+        background: linear-gradient(#27c07a, #179a5e);
+        color: #04130c;
+        box-shadow: 0 3px 0 #0b5e3a;
+        animation: savepulse 1.7s ease-in-out infinite;
+      }
+      .bigbtn.save.dirty:active {
+        box-shadow: 0 1px 0 #0b5e3a;
+      }
+      @keyframes savepulse {
+        0%,
+        100% {
+          box-shadow:
+            0 3px 0 #0b5e3a,
+            0 0 0 0 rgba(39, 192, 122, 0.5);
+        }
+        50% {
+          box-shadow:
+            0 3px 0 #0b5e3a,
+            0 0 0 9px rgba(39, 192, 122, 0);
+        }
+      }
+      .tab-badge.unsaved {
+        background: #3a2410;
+        color: var(--warn);
+        border-color: #5a3a14;
+      }
 
-/* ===== RIGHT : MENU AREA (2/3) ===== */
-.right{flex:1 1 66.666%; display:flex; gap:var(--gap); min-width:0;}
+      /* ===== RIGHT : MENU AREA (2/3) ===== */
+      .right {
+        flex: 1 1 66.666%;
+        display: flex;
+        gap: var(--gap);
+        min-width: 0;
+      }
 
-/* main grid (left of the 2/3) */
-.grid-wrap{flex:1 1 auto; display:flex; flex-direction:column; min-width:0;
-  background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden;}
-.grid-head{flex:0 0 auto; padding:10px 16px; border-bottom:1px solid var(--line-soft); background:var(--panel-2);
-  font-weight:700; letter-spacing:1px; font-size:13px; text-transform:uppercase; color:var(--text-dim);
-  display:flex; align-items:center; gap:10px;}
-.grid-head .swatch{width:12px;height:12px;border-radius:4px;}
-.grid{flex:1 1 auto; overflow-y:auto; padding:var(--gap);
-  display:grid; grid-template-columns:repeat(auto-fill, minmax(132px,1fr)); grid-auto-rows:88px; gap:var(--gap); align-content:start;}
-.grid .placeholder{grid-column:1/-1; height:100%; display:flex; align-items:center; justify-content:center;
-  color:var(--text-faint); font-size:15px; text-align:center; padding:40px;}
+      /* main grid (left of the 2/3) */
+      .grid-wrap {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .grid-head {
+        flex: 0 0 auto;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--line-soft);
+        background: var(--panel-2);
+        font-weight: 700;
+        letter-spacing: 1px;
+        font-size: 13px;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .grid-head .swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 4px;
+      }
+      .grid {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: var(--gap);
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+        grid-auto-rows: 88px;
+        gap: var(--gap);
+        align-content: start;
+      }
+      .grid .placeholder {
+        grid-column: 1/-1;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-faint);
+        font-size: 15px;
+        text-align: center;
+        padding: 40px;
+      }
 
-/* far-right top-level category sidebar */
-.cats{flex:0 0 168px; display:flex; flex-direction:column; gap:var(--gap); overflow-y:auto; padding-right:2px;}
-.cat-btn{
-  flex:0 0 auto; min-height:74px; border-radius:12px; padding:10px 12px;
-  display:flex; align-items:center; text-align:left; font-weight:800; font-size:16px; line-height:1.1;
-  color:#fff; position:relative; overflow:hidden; border:1px solid rgba(0,0,0,.25);
-  box-shadow:0 3px 0 rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18);
-  text-shadow:0 1px 2px rgba(0,0,0,.35);
-}
-.cat-btn:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18);}
-.cat-btn.active{outline:3px solid #fff; outline-offset:-3px;}
+      /* far-right top-level category sidebar */
+      .cats {
+        flex: 0 0 168px;
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap);
+        overflow-y: auto;
+        padding-right: 2px;
+      }
+      .cat-btn {
+        flex: 0 0 auto;
+        min-height: 74px;
+        border-radius: 12px;
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        text-align: left;
+        font-weight: 800;
+        font-size: 16px;
+        line-height: 1.1;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.25);
+        box-shadow:
+          0 3px 0 rgba(0, 0, 0, 0.35),
+          inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+      }
+      .cat-btn:active {
+        transform: translateY(2px);
+        box-shadow:
+          0 1px 0 rgba(0, 0, 0, 0.35),
+          inset 0 1px 0 rgba(255, 255, 255, 0.18);
+      }
+      .cat-btn.active {
+        outline: 3px solid #fff;
+        outline-offset: -3px;
+      }
 
-/* tiles (shared by grid + modal) */
-.tile{
-  border-radius:var(--tile-radius); padding:10px 12px; color:#fff; position:relative; overflow:hidden;
-  display:flex; flex-direction:column; justify-content:space-between; text-align:left;
-  border:1px solid rgba(0,0,0,.22);
-  box-shadow:0 3px 0 rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.16);
-  text-shadow:0 1px 2px rgba(0,0,0,.3);
-}
-.tile:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.16);}
-.tile .t-name{font-weight:800; font-size:15px; line-height:1.12;}
-.tile.cat .chev{position:absolute; top:8px; right:9px; font-size:13px; opacity:.7;}
-.tile .price{align-self:flex-start; font-family:var(--font-c); font-weight:700; font-size:15px;
-  background:rgba(0,0,0,.28); padding:1px 9px; border-radius:999px; margin-top:6px;}
-.tile.flash{animation:flash .4s ease;}
-@keyframes flash{0%{box-shadow:0 0 0 0 #fff, inset 0 0 0 3px #fff;}100%{box-shadow:0 3px 0 rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.16);}}
+      /* tiles (shared by grid + modal) */
+      .tile {
+        border-radius: var(--tile-radius);
+        padding: 10px 12px;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        text-align: left;
+        border: 1px solid rgba(0, 0, 0, 0.22);
+        box-shadow:
+          0 3px 0 rgba(0, 0, 0, 0.32),
+          inset 0 1px 0 rgba(255, 255, 255, 0.16);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+      .tile:active {
+        transform: translateY(2px);
+        box-shadow:
+          0 1px 0 rgba(0, 0, 0, 0.32),
+          inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      }
+      .tile .t-name {
+        font-weight: 800;
+        font-size: 15px;
+        line-height: 1.12;
+      }
+      .tile.cat .chev {
+        position: absolute;
+        top: 8px;
+        right: 9px;
+        font-size: 13px;
+        opacity: 0.7;
+      }
+      .tile .price {
+        align-self: flex-start;
+        font-family: var(--font-c);
+        font-weight: 700;
+        font-size: 15px;
+        background: rgba(0, 0, 0, 0.28);
+        padding: 1px 9px;
+        border-radius: 999px;
+        margin-top: 6px;
+      }
+      .tile.flash {
+        animation: flash 0.4s ease;
+      }
+      @keyframes flash {
+        0% {
+          box-shadow:
+            0 0 0 0 #fff,
+            inset 0 0 0 3px #fff;
+        }
+        100% {
+          box-shadow:
+            0 3px 0 rgba(0, 0, 0, 0.32),
+            inset 0 1px 0 rgba(255, 255, 255, 0.16);
+        }
+      }
 
-/* ===== Modal (deep category nav, keypad, open tabs) ===== */
-.overlay{position:fixed; inset:0; z-index:500; background:rgba(4,7,11,.72); backdrop-filter:blur(3px);
-  display:none; align-items:center; justify-content:center; padding:14px;}
-.overlay.show{display:flex;}
-.modal{width:min(100%,920px); max-height:100%; background:var(--panel); border:1px solid var(--line);
-  border-radius:16px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 24px 60px rgba(0,0,0,.6);}
-.modal.narrow{width:min(100%,420px);}
-.return-bar{flex:0 0 auto; display:flex; align-items:center; gap:12px; padding:10px; border-bottom:1px solid var(--line);
-  background:var(--panel-2);}
-.return-btn{flex:0 0 auto; height:54px; padding:0 22px; border-radius:11px; font-weight:800; font-size:17px;
-  text-transform:uppercase; letter-spacing:1px; color:#fff; display:flex; align-items:center; gap:10px;
-  background:linear-gradient(var(--danger),var(--danger-d)); box-shadow:0 4px 0 #7e1422;}
-.return-btn:active{transform:translateY(2px); box-shadow:0 2px 0 #7e1422;}
-.crumb{flex:1; min-width:0; font-weight:700; color:var(--text-dim); font-size:14px;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-.crumb b{color:var(--text);}
-.modal-grid{flex:1 1 auto; overflow-y:auto; padding:var(--gap);
-  display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); grid-auto-rows:92px; gap:var(--gap); align-content:start;}
+      /* ===== Modal (deep category nav, keypad, open tabs) ===== */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        background: rgba(4, 7, 11, 0.72);
+        backdrop-filter: blur(3px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 14px;
+      }
+      .overlay.show {
+        display: flex;
+      }
+      .modal {
+        width: min(100%, 920px);
+        max-height: 100%;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+      }
+      .modal.narrow {
+        width: min(100%, 420px);
+      }
+      .return-bar {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel-2);
+      }
+      .return-btn {
+        flex: 0 0 auto;
+        height: 54px;
+        padding: 0 22px;
+        border-radius: 11px;
+        font-weight: 800;
+        font-size: 17px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(var(--danger), var(--danger-d));
+        box-shadow: 0 4px 0 #7e1422;
+      }
+      .return-btn:active {
+        transform: translateY(2px);
+        box-shadow: 0 2px 0 #7e1422;
+      }
+      .crumb {
+        flex: 1;
+        min-width: 0;
+        font-weight: 700;
+        color: var(--text-dim);
+        font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .crumb b {
+        color: var(--text);
+      }
+      .modal-grid {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: var(--gap);
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        grid-auto-rows: 92px;
+        gap: var(--gap);
+        align-content: start;
+      }
 
-/* keypad */
-.kp-head{padding:14px 16px 4px; text-align:center; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text-dim); font-size:13px;}
-.kp-display{margin:8px 16px 4px; height:64px; border-radius:12px; background:#0c1119; border:1px solid var(--line);
-  display:flex; align-items:center; justify-content:center; font-family:var(--font-c); font-weight:700; font-size:34px; letter-spacing:2px;}
-.kp-display .ph{color:var(--text-faint); letter-spacing:1px; font-size:18px;}
-.kp{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:12px 16px;}
-.kp button{height:56px; border-radius:11px; background:var(--panel-2); border:1px solid var(--line);
-  font-family:var(--font-c); font-size:24px; font-weight:700; box-shadow:0 3px 0 #0b0f16;}
-.kp button:active{transform:translateY(2px); box-shadow:0 1px 0 #0b0f16;}
-.kp button.del{color:var(--warn); font-size:18px;}
-.kp button.ok{background:linear-gradient(var(--good),#16573d); color:#fff; box-shadow:0 3px 0 #0c3a28; font-size:18px; font-weight:800;}
-.kp button.ok:active{box-shadow:0 1px 0 #0c3a28;}
+      /* keypad */
+      .kp-head {
+        padding: 14px 16px 4px;
+        text-align: center;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        font-size: 13px;
+      }
+      .kp-display {
+        margin: 8px 16px 4px;
+        height: 64px;
+        border-radius: 12px;
+        background: #0c1119;
+        border: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-c);
+        font-weight: 700;
+        font-size: 34px;
+        letter-spacing: 2px;
+      }
+      .kp-display .ph {
+        color: var(--text-faint);
+        letter-spacing: 1px;
+        font-size: 18px;
+      }
+      .kp {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        padding: 12px 16px;
+      }
+      .kp button {
+        height: 56px;
+        border-radius: 11px;
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        font-family: var(--font-c);
+        font-size: 24px;
+        font-weight: 700;
+        box-shadow: 0 3px 0 #0b0f16;
+      }
+      .kp button:active {
+        transform: translateY(2px);
+        box-shadow: 0 1px 0 #0b0f16;
+      }
+      .kp button.del {
+        color: var(--warn);
+        font-size: 18px;
+      }
+      .kp button.ok {
+        background: linear-gradient(var(--good), #16573d);
+        color: #fff;
+        box-shadow: 0 3px 0 #0c3a28;
+        font-size: 18px;
+        font-weight: 800;
+      }
+      .kp button.ok:active {
+        box-shadow: 0 1px 0 #0c3a28;
+      }
 
-/* open tabs list */
-.tabs-list{flex:1 1 auto; overflow-y:auto; padding:var(--gap); display:flex; flex-direction:column; gap:var(--gap);}
-.tabs-empty{padding:50px 20px; text-align:center; color:var(--text-faint);}
-.tab-row{display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px;
-  background:var(--panel-2); border:1px solid var(--line);}
-.tab-row:active{filter:brightness(1.08);}
-.tab-row .num{font-family:var(--font-c); font-weight:700; font-size:26px; color:var(--accent);
-  width:60px; flex:0 0 auto;}
-.tab-row .meta{flex:1; min-width:0;}
-.tab-row .meta .tt{font-family:var(--font-c); font-weight:700; font-size:20px;}
-.tab-row .meta .ti{font-size:12px; color:var(--text-dim);}
-.tab-row .del{flex:0 0 auto; width:48px; height:48px; border-radius:10px; background:#2a1418; color:var(--danger);
-  border:1px solid #4a1f26; font-size:22px; font-weight:800;}
-.tab-row .del:active{transform:translateY(1px);}
+      /* open tabs list */
+      .tabs-list {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: var(--gap);
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap);
+      }
+      .tabs-empty {
+        padding: 50px 20px;
+        text-align: center;
+        color: var(--text-faint);
+      }
+      .tab-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+      }
+      .tab-row:active {
+        filter: brightness(1.08);
+      }
+      .tab-row .num {
+        font-family: var(--font-c);
+        font-weight: 700;
+        font-size: 26px;
+        color: var(--accent);
+        width: 60px;
+        flex: 0 0 auto;
+      }
+      .tab-row .meta {
+        flex: 1;
+        min-width: 0;
+      }
+      .tab-row .meta .tt {
+        font-family: var(--font-c);
+        font-weight: 700;
+        font-size: 20px;
+      }
+      .tab-row .meta .ti {
+        font-size: 12px;
+        color: var(--text-dim);
+      }
+      .tab-row .del {
+        flex: 0 0 auto;
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        background: #2a1418;
+        color: var(--danger);
+        border: 1px solid #4a1f26;
+        font-size: 22px;
+        font-weight: 800;
+      }
+      .tab-row .del:active {
+        transform: translateY(1px);
+      }
 
-.modal-foot{flex:0 0 auto; padding:10px; border-top:1px solid var(--line); background:var(--panel-2);}
-.foot-close{width:100%; height:46px; border-radius:10px; background:var(--panel); border:1px solid var(--line);
-  color:var(--text-dim); font-weight:700; letter-spacing:1px; text-transform:uppercase; font-size:13px;}
+      .modal-foot {
+        flex: 0 0 auto;
+        padding: 10px;
+        border-top: 1px solid var(--line);
+        background: var(--panel-2);
+      }
+      .foot-close {
+        width: 100%;
+        height: 46px;
+        border-radius: 10px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        color: var(--text-dim);
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 13px;
+      }
 
-/* toast */
-#toast{position:fixed; bottom:16px; left:50%; transform:translateX(-50%) translateY(20px); opacity:0;
-  background:#0c1119; border:1px solid var(--line); padding:11px 20px; border-radius:11px; font-weight:700;
-  z-index:800; transition:.25s; box-shadow:0 10px 30px rgba(0,0,0,.5); pointer-events:none; font-size:14px;}
-#toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+      /* toast */
+      #toast {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0;
+        background: #0c1119;
+        border: 1px solid var(--line);
+        padding: 11px 20px;
+        border-radius: 11px;
+        font-weight: 700;
+        z-index: 800;
+        transition: 0.25s;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        pointer-events: none;
+        font-size: 14px;
+      }
+      #toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
 
-::-webkit-scrollbar{width:9px;height:9px;}
-::-webkit-scrollbar-thumb{background:#2b3645; border-radius:8px;}
-::-webkit-scrollbar-track{background:transparent;}
-</style>
-</head>
-<body>
+      /* ---- icons / dietary / options added for rich menu ---- */
+      .cat-ico {
+        font-size: 20px;
+        margin-right: 8px;
+        line-height: 1;
+      }
+      .t-name {
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        display: -webkit-box;
+        overflow: hidden;
+      }
+      .t-foot {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 6px;
+      }
+      .opt-ico {
+        position: absolute;
+        top: 7px;
+        right: 9px;
+        font-size: 13px;
+        opacity: 0.65;
+      }
+      .diet {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+      .dg {
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        padding: 1px 5px;
+        border-radius: 5px;
+        background: rgba(0, 0, 0, 0.3);
+        color: #fff;
+      }
+      .dg.veg {
+        background: rgba(46, 157, 120, 0.85);
+      }
+      .dg.gf {
+        background: rgba(243, 167, 18, 0.85);
+        color: #1a1205;
+      }
 
-<div id="rotate">
-  <div class="ph">📱</div>
-  <h2>Please rotate to landscape</h2>
-  <p>This till is designed for landscape. Turn the tablet sideways to continue.</p>
-</div>
+      .ln-mid {
+        min-width: 0;
+      }
+      .ln-opt {
+        font-size: 11px;
+        color: var(--accent);
+        font-weight: 600;
+        line-height: 1.25;
+        margin-top: 1px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .bill-note {
+        flex: 0 0 auto;
+        padding: 0 16px 8px;
+        font-size: 11px;
+        color: var(--warn);
+        background: var(--panel-2);
+      }
+      .bill-note:empty {
+        display: none;
+        padding: 0;
+      }
 
-<div id="app">
-  <div class="topbar">
-    <div class="brand">THE <span>TILL</span></div>
-    <div class="spacer"></div>
-    <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Loading…</span></div>
-    <button class="iconbtn" id="fsBtn">⛶ Fullscreen</button>
-  </div>
+      /* modifier dialog */
+      .mod-body {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: 6px 14px;
+      }
+      .mg {
+        padding: 10px 0;
+        border-bottom: 1px solid var(--line-soft);
+      }
+      .mg:last-child {
+        border-bottom: none;
+      }
+      .mg-h {
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 12px;
+        color: var(--text-dim);
+        margin-bottom: 8px;
+      }
+      .mg-cnt {
+        color: var(--accent);
+        margin-left: 6px;
+      }
+      .mg-opts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .opt {
+        padding: 11px 16px;
+        border-radius: 10px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--text-dim);
+        box-shadow: 0 2px 0 #0b0f16;
+      }
+      .opt:active {
+        transform: translateY(1px);
+        box-shadow: 0 1px 0 #0b0f16;
+      }
+      .opt.on {
+        background: linear-gradient(var(--accent), #235fc4);
+        color: #fff;
+        border-color: #1d3650;
+        box-shadow: 0 2px 0 #173e84;
+      }
+      .mod-foot {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .mod-price {
+        font-family: var(--font-c);
+        font-weight: 700;
+        font-size: 22px;
+        min-width: 60px;
+      }
+      .mod-add {
+        flex: 1;
+        height: 54px;
+        border-radius: 11px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 16px;
+        color: #fff;
+        background: linear-gradient(var(--good), #16573d);
+        box-shadow: 0 3px 0 #0c3a28;
+      }
+      .mod-add:active {
+        transform: translateY(2px);
+        box-shadow: 0 1px 0 #0c3a28;
+      }
+      #overlay2 {
+        z-index: 600;
+      }
 
-  <div class="main">
-    <!-- LEFT: BILL -->
-    <section class="bill">
-      <div class="bill-head">
-        <span class="lbl">Current Order</span>
-        <span class="tab-badge none" id="tabBadge">No tab</span>
-      </div>
-      <div class="bill-list" id="billList"></div>
-      <div class="bill-total">
-        <span class="t">Total</span>
-        <span><span class="v" id="billTotal">£0.00</span><span class="cnt" id="billCount"></span></span>
-      </div>
-      <div class="tab-controls">
-        <div class="row">
-          <button class="bigbtn tab" id="tabBtn">🔢 Tab</button>
-          <button class="bigbtn open" id="openBtn">📂 Open Tabs</button>
+      ::-webkit-scrollbar {
+        width: 9px;
+        height: 9px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #2b3645;
+        border-radius: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="rotate">
+      <div class="ph">📱</div>
+      <h2>Please rotate to landscape</h2>
+      <p>
+        This till is designed for landscape. Turn the tablet sideways to
+        continue.
+      </p>
+    </div>
+
+    <div id="app">
+      <div class="topbar">
+        <div class="brand">THE <span>TILL</span></div>
+        <div class="spacer"></div>
+        <div class="status">
+          <span class="dot" id="statusDot"></span
+          ><span id="statusText">Loading…</span>
         </div>
-        <button class="bigbtn clear" id="clearBtn">Clear Tab</button>
+        <button class="iconbtn" id="fsBtn">⛶ Fullscreen</button>
       </div>
-    </section>
 
-    <!-- RIGHT: MENU -->
-    <section class="right">
-      <div class="grid-wrap">
-        <div class="grid-head" id="gridHead"><span class="swatch" id="gridSwatch" style="display:none"></span><span id="gridTitle">Menu</span></div>
-        <div class="grid" id="grid"></div>
+      <div class="main">
+        <!-- LEFT: BILL -->
+        <section class="bill">
+          <div class="bill-head">
+            <span class="lbl">Current Order</span>
+            <span class="tab-badge none" id="tabBadge">No tab</span>
+          </div>
+          <div class="bill-list" id="billList"></div>
+          <div class="bill-total">
+            <span class="t">Total</span>
+            <span
+              ><span class="v" id="billTotal">£0.00</span
+              ><span class="cnt" id="billCount"></span
+            ></span>
+          </div>
+          <div class="bill-note" id="billNote"></div>
+          <div class="tab-controls">
+            <div class="row">
+              <button class="bigbtn tab" id="tabBtn">🔢 Tab</button>
+              <button class="bigbtn open" id="openBtn">📂 Open Tabs</button>
+            </div>
+            <div class="row">
+              <button class="bigbtn save" id="saveBtn">💾 Save</button>
+              <button class="bigbtn clear" id="clearBtn">Clear Tab</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- RIGHT: MENU -->
+        <section class="right">
+          <div class="grid-wrap">
+            <div class="grid-head" id="gridHead">
+              <span class="swatch" id="gridSwatch" style="display: none"></span
+              ><span id="gridTitle">Menu</span>
+            </div>
+            <div class="grid" id="grid"></div>
+          </div>
+          <div class="cats" id="cats"></div>
+        </section>
       </div>
-      <div class="cats" id="cats"></div>
-    </section>
-  </div>
-</div>
+    </div>
 
-<!-- Generic overlay reused for category modal / keypad / open tabs -->
-<div class="overlay" id="overlay"></div>
-<div id="toast"></div>
+    <!-- Generic overlay reused for category modal / keypad / open tabs -->
+    <div class="overlay" id="overlay"></div>
+    <!-- Second layer: modifier (choices / scoops) dialog, sits above the category modal -->
+    <div class="overlay" id="overlay2"></div>
+    <div id="toast"></div>
 
-<script>
-/* ============================================================
+    <!-- Your menu lives in data.js (the MENUS format). Loaded before the app. -->
+    <script src="data.js"></script>
+
+    <script>
+      /* ============================================================
    1. CONFIGURATION
    ------------------------------------------------------------
    • API_BASE: leave "" to run fully offline using the tablet's
@@ -314,358 +1108,820 @@ button{font-family:inherit; color:inherit; border:none; background:none; cursor:
      all tabs across every device (see README.md).
    • CURRENCY: change to "$", "€" etc. if needed.
    ============================================================ */
-const CONFIG = {
-  API_BASE: "",                 // e.g. "https://till-api.yourname.workers.dev"
-  CURRENCY: "£",
-  MENU_URL: "menu.json"
-};
+      const CONFIG = {
+        API_BASE: "https://till-api.ethanredfern04.workers.dev", // e.g. "https://till-api.yourname.workers.dev"
+        CURRENCY: "£",
+        MENU_URL: "menu.json",
+      };
 
-/* ============================================================
+      /* ============================================================
    2. STORAGE ADAPTER  (Cloudflare Worker  ||  localStorage)
    ============================================================ */
-const LS_KEY = "till_tabs_v1";
-let backend = CONFIG.API_BASE ? "remote" : "local";
+      const LS_KEY = "till_tabs_v1";
+      let backend = CONFIG.API_BASE ? "remote" : "local";
 
-const store = {
-  _ls(){ try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch { return {}; } },
-  _save(o){ localStorage.setItem(LS_KEY, JSON.stringify(o)); },
+      const store = {
+        _ls() {
+          try {
+            return JSON.parse(localStorage.getItem(LS_KEY)) || {};
+          } catch {
+            return {};
+          }
+        },
+        _save(o) {
+          localStorage.setItem(LS_KEY, JSON.stringify(o));
+        },
 
-  async listTabs(){
-    if (backend === "remote"){
-      const r = await fetch(CONFIG.API_BASE + "/tabs");
-      if(!r.ok) throw new Error("list failed");
-      return await r.json();
-    }
-    const o = this._ls();
-    return Object.keys(o).map(n => ({
-      number:n, items:o[n].items, updatedAt:o[n].updatedAt,
-      total:(o[n].items||[]).reduce((s,i)=>s+i.price*i.qty,0)
-    })).sort((a,b)=>(""+a.number).localeCompare(""+b.number,undefined,{numeric:true}));
-  },
-  async getTab(number){
-    if (backend === "remote"){
-      const r = await fetch(CONFIG.API_BASE + "/tabs/" + encodeURIComponent(number));
-      if(r.status===404) return null;
-      if(!r.ok) throw new Error("get failed");
-      return await r.json();
-    }
-    const o = this._ls();
-    return o[number] ? {number, items:o[number].items} : null;
-  },
-  async saveTab(number, items){
-    if (backend === "remote"){
-      const r = await fetch(CONFIG.API_BASE + "/tabs/" + encodeURIComponent(number), {
-        method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify({items})
-      });
-      if(!r.ok) throw new Error("save failed");
-      return;
-    }
-    const o = this._ls(); o[number] = {items, updatedAt:Date.now()}; this._save(o);
-  },
-  async deleteTab(number){
-    if (backend === "remote"){
-      const r = await fetch(CONFIG.API_BASE + "/tabs/" + encodeURIComponent(number), {method:"DELETE"});
-      if(!r.ok && r.status!==404) throw new Error("delete failed");
-      return;
-    }
-    const o = this._ls(); delete o[number]; this._save(o);
-  }
-};
+        async listTabs() {
+          if (backend === "remote") {
+            const r = await fetch(CONFIG.API_BASE + "/tabs");
+            if (!r.ok) throw new Error("list failed");
+            return await r.json();
+          }
+          const o = this._ls();
+          return Object.keys(o)
+            .map((n) => ({
+              number: n,
+              items: o[n].items,
+              updatedAt: o[n].updatedAt,
+              total: (o[n].items || []).reduce(
+                (s, i) => s + i.price * i.qty,
+                0,
+              ),
+            }))
+            .sort((a, b) =>
+              ("" + a.number).localeCompare("" + b.number, undefined, {
+                numeric: true,
+              }),
+            );
+        },
+        async getTab(number) {
+          if (backend === "remote") {
+            const r = await fetch(
+              CONFIG.API_BASE + "/tabs/" + encodeURIComponent(number),
+            );
+            if (r.status === 404) return null;
+            if (!r.ok) throw new Error("get failed");
+            return await r.json();
+          }
+          const o = this._ls();
+          return o[number] ? { number, items: o[number].items } : null;
+        },
+        async saveTab(number, items) {
+          if (backend === "remote") {
+            const r = await fetch(
+              CONFIG.API_BASE + "/tabs/" + encodeURIComponent(number),
+              {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ items }),
+              },
+            );
+            if (!r.ok) throw new Error("save failed");
+            return;
+          }
+          const o = this._ls();
+          o[number] = { items, updatedAt: Date.now() };
+          this._save(o);
+        },
+        async deleteTab(number) {
+          if (backend === "remote") {
+            const r = await fetch(
+              CONFIG.API_BASE + "/tabs/" + encodeURIComponent(number),
+              { method: "DELETE" },
+            );
+            if (!r.ok && r.status !== 404) throw new Error("delete failed");
+            return;
+          }
+          const o = this._ls();
+          delete o[number];
+          this._save(o);
+        },
+      };
 
-/* ============================================================
+      /* ============================================================
    3. STATE
    ============================================================ */
-let MENU = null;
-let topCats = [];
-let activeTopIndex = 0;
-let order = [];          // [{id,name,price,qty}]
-let activeTab = null;    // string | null
-let saveTimer = null;
+      let MENU = null;
+      let topCats = [];
+      let activeTopIndex = 0;
+      let order = []; // [{id,name,price,qty}]
+      let activeTab = null; // string | null
+      let dirty = false; // are there unsaved local changes?
+      let tabPersisted = false; // has the active tab been written to the DB yet?
+      let lastTabsList = []; // cached from Open Tabs so loading needs no extra read
 
-/* ============================================================
+      /* ============================================================
    4. MENU LOADING + NORMALISATION
    An "item" is any node that has a numeric `price`.
    A "category" is any node with a `children` array.
    Colours: use node.color, else inherit parent, else palette.
    ============================================================ */
-const PALETTE = ["#e4572e","#f3a712","#2d9d78","#3a86ff","#8338ec","#d81159",
-                 "#0fa3b1","#6a994e","#bc4749","#ff6b35","#118ab2","#9b5de5"];
-function hashColor(name){
-  let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0;
-  return PALETTE[h % PALETTE.length];
-}
-function normalise(node, path, inheritedColor){
-  node._path = path;
-  node._isItem = (typeof node.price === "number");
-  node._color = node.color || (node._isItem ? inheritedColor : hashColor(node.name||path));
-  if (Array.isArray(node.children))
-    node.children.forEach(c => normalise(c, path + " / " + c.name, node._color));
-  return node;
-}
+      const PALETTE = [
+        "#e4572e",
+        "#f3a712",
+        "#2d9d78",
+        "#3a86ff",
+        "#8338ec",
+        "#d81159",
+        "#0fa3b1",
+        "#6a994e",
+        "#bc4749",
+        "#ff6b35",
+        "#118ab2",
+        "#9b5de5",
+      ];
+      function hashColor(name) {
+        let h = 0;
+        for (let i = 0; i < name.length; i++)
+          h = (h * 31 + name.charCodeAt(i)) >>> 0;
+        return PALETTE[h % PALETTE.length];
+      }
+      function normalise(node, path, inheritedColor) {
+        node._path = path;
+        const hasKids =
+          Array.isArray(node.children) && node.children.length > 0;
+        node._isItem = !hasKids;
+        node._color =
+          node.color ||
+          (node._isItem ? inheritedColor : hashColor(node.name || path));
+        if (hasKids)
+          node.children.forEach((c) =>
+            normalise(c, path + " / " + c.name, node._color),
+          );
+        return node;
+      }
 
-const DEFAULT_MENU = {
-  "name":"Menu",
-  "children":[
-    {"name":"Draught","color":"#3a86ff","children":[
-      {"name":"Lager","children":[
-        {"name":"Carling","price":4.60},{"name":"Stella Artois","price":5.20},
-        {"name":"Madri","price":5.40},{"name":"Camden Hells","price":5.80}
-      ]},
-      {"name":"Ale & Cider","children":[
-        {"name":"Guinness","price":5.30},{"name":"Doom Bar","price":4.90},
-        {"name":"Aspall Cider","price":5.10},{"name":"Inch's","price":4.80}
-      ]}
-    ]},
-    {"name":"Wine","color":"#8338ec","children":[
-      {"name":"Red","children":[
-        {"name":"Merlot 175ml","price":5.50},{"name":"Malbec 175ml","price":6.20},
-        {"name":"Merlot Bottle","price":21.00}
-      ]},
-      {"name":"White","children":[
-        {"name":"Pinot Grigio 175ml","price":5.40},{"name":"Sauv Blanc 175ml","price":6.00}
-      ]},
-      {"name":"Rosé 175ml","price":5.40},
-      {"name":"Prosecco 125ml","price":6.50}
-    ]},
-    {"name":"Spirits","color":"#0fa3b1","children":[
-      {"name":"Vodka","children":[
-        {"name":"House Vodka","price":3.80},{"name":"Grey Goose","price":5.50}
-      ]},
-      {"name":"Gin","children":[
-        {"name":"Gordon's","price":3.90},{"name":"Tanqueray","price":4.60},{"name":"Hendrick's","price":5.20}
-      ]},
-      {"name":"Whisky","children":[
-        {"name":"Famous Grouse","price":3.90},{"name":"Jack Daniel's","price":4.60}
-      ]}
-    ]},
-    {"name":"Soft Drinks","color":"#2d9d78","children":[
-      {"name":"Coca-Cola","price":2.80},{"name":"Diet Coke","price":2.80},
-      {"name":"Lemonade","price":2.60},{"name":"J2O","price":3.20},
-      {"name":"Still Water","price":2.20},{"name":"Sparkling Water","price":2.20}
-    ]},
-    {"name":"Food","color":"#e4572e","children":[
-      {"name":"Burgers","children":[
-        {"name":"Classic Beef","price":12.50},{"name":"Bacon Cheese","price":13.95},
-        {"name":"Halloumi","price":11.50}
-      ]},
-      {"name":"Mains","children":[
-        {"name":"Fish & Chips","price":14.50},{"name":"Bangers & Mash","price":12.95},
-        {"name":"Scampi","price":13.50}
-      ]},
-      {"name":"Sides","children":[
-        {"name":"Chips","price":4.00},{"name":"Onion Rings","price":4.50},{"name":"Side Salad","price":3.50}
-      ]}
-    ]},
-    {"name":"Hot Drinks","color":"#bc4749","children":[
-      {"name":"Americano","price":3.20},{"name":"Latte","price":3.50},
-      {"name":"Cappuccino","price":3.50},{"name":"Tea","price":2.80}
-    ]}
-  ]
-};
+      /* ----- Convert the MENUS format (data.js) into the internal tree -----
+   MENUS > category(icon/sections) > section(subsections | items)
+         > subsection(items) > item(price?/choices?/dietary?/scoopBuilder?)
+   A node is an ITEM when it has no child categories. */
+      const MENU_META = new Set([
+        "icon",
+        "availability",
+        "sections",
+        "subsections",
+        "choices",
+        "price",
+        "dietary",
+        "scoopBuilder",
+      ]);
+      const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
+      function convNode(name, obj) {
+        const node = { name };
+        if (obj && obj.icon) node.icon = obj.icon;
+        let entries = null;
+        if (isObj(obj) && isObj(obj.sections))
+          entries = Object.entries(obj.sections);
+        else if (isObj(obj) && isObj(obj.subsections))
+          entries = Object.entries(obj.subsections);
+        else if (isObj(obj)) {
+          const kids = Object.entries(obj).filter(
+            ([k, v]) => !MENU_META.has(k) && isObj(v),
+          );
+          if (kids.length) entries = kids;
+        }
+        if (entries) {
+          node.children = entries.map(([k, v]) => convNode(k, v));
+        } else {
+          if (typeof obj.price === "number") node.price = obj.price;
+          if (obj.choices) node.choices = obj.choices;
+          if (obj.dietary) node.dietary = obj.dietary;
+          if (obj.scoopBuilder) node.scoopBuilder = obj.scoopBuilder;
+        }
+        return node;
+      }
+      function convertMENUS(M) {
+        return {
+          name: "Menu",
+          children: Object.entries(M).map(([k, v]) => convNode(k, v)),
+        };
+      }
 
-async function loadMenu(){
-  let data = null;
-  try{
-    const r = await fetch(CONFIG.MENU_URL, {cache:"no-store"});
-    if(r.ok) data = await r.json();
-  }catch(e){ /* fall back below */ }
-  if(!data || !Array.isArray(data.children)) data = DEFAULT_MENU;
-  MENU = normalise(data, data.name || "Menu", "#3a86ff");
-  topCats = MENU.children;
-}
+      const DEFAULT_MENU = {
+        name: "Menu",
+        children: [
+          {
+            name: "Draught",
+            color: "#3a86ff",
+            children: [
+              {
+                name: "Lager",
+                children: [
+                  { name: "Carling", price: 4.6 },
+                  { name: "Stella Artois", price: 5.2 },
+                  { name: "Madri", price: 5.4 },
+                  { name: "Camden Hells", price: 5.8 },
+                ],
+              },
+              {
+                name: "Ale & Cider",
+                children: [
+                  { name: "Guinness", price: 5.3 },
+                  { name: "Doom Bar", price: 4.9 },
+                  { name: "Aspall Cider", price: 5.1 },
+                  { name: "Inch's", price: 4.8 },
+                ],
+              },
+            ],
+          },
+          {
+            name: "Wine",
+            color: "#8338ec",
+            children: [
+              {
+                name: "Red",
+                children: [
+                  { name: "Merlot 175ml", price: 5.5 },
+                  { name: "Malbec 175ml", price: 6.2 },
+                  { name: "Merlot Bottle", price: 21.0 },
+                ],
+              },
+              {
+                name: "White",
+                children: [
+                  { name: "Pinot Grigio 175ml", price: 5.4 },
+                  { name: "Sauv Blanc 175ml", price: 6.0 },
+                ],
+              },
+              { name: "Rosé 175ml", price: 5.4 },
+              { name: "Prosecco 125ml", price: 6.5 },
+            ],
+          },
+          {
+            name: "Spirits",
+            color: "#0fa3b1",
+            children: [
+              {
+                name: "Vodka",
+                children: [
+                  { name: "House Vodka", price: 3.8 },
+                  { name: "Grey Goose", price: 5.5 },
+                ],
+              },
+              {
+                name: "Gin",
+                children: [
+                  { name: "Gordon's", price: 3.9 },
+                  { name: "Tanqueray", price: 4.6 },
+                  { name: "Hendrick's", price: 5.2 },
+                ],
+              },
+              {
+                name: "Whisky",
+                children: [
+                  { name: "Famous Grouse", price: 3.9 },
+                  { name: "Jack Daniel's", price: 4.6 },
+                ],
+              },
+            ],
+          },
+          {
+            name: "Soft Drinks",
+            color: "#2d9d78",
+            children: [
+              { name: "Coca-Cola", price: 2.8 },
+              { name: "Diet Coke", price: 2.8 },
+              { name: "Lemonade", price: 2.6 },
+              { name: "J2O", price: 3.2 },
+              { name: "Still Water", price: 2.2 },
+              { name: "Sparkling Water", price: 2.2 },
+            ],
+          },
+          {
+            name: "Food",
+            color: "#e4572e",
+            children: [
+              {
+                name: "Burgers",
+                children: [
+                  { name: "Classic Beef", price: 12.5 },
+                  { name: "Bacon Cheese", price: 13.95 },
+                  { name: "Halloumi", price: 11.5 },
+                ],
+              },
+              {
+                name: "Mains",
+                children: [
+                  { name: "Fish & Chips", price: 14.5 },
+                  { name: "Bangers & Mash", price: 12.95 },
+                  { name: "Scampi", price: 13.5 },
+                ],
+              },
+              {
+                name: "Sides",
+                children: [
+                  { name: "Chips", price: 4.0 },
+                  { name: "Onion Rings", price: 4.5 },
+                  { name: "Side Salad", price: 3.5 },
+                ],
+              },
+            ],
+          },
+          {
+            name: "Hot Drinks",
+            color: "#bc4749",
+            children: [
+              { name: "Americano", price: 3.2 },
+              { name: "Latte", price: 3.5 },
+              { name: "Cappuccino", price: 3.5 },
+              { name: "Tea", price: 2.8 },
+            ],
+          },
+        ],
+      };
 
-/* ============================================================
+      async function loadMenu() {
+        let data = null;
+        // 1) data.js (the MENUS format) if it loaded
+        if (
+          typeof MENUS !== "undefined" &&
+          MENUS &&
+          Object.keys(MENUS).length
+        ) {
+          try {
+            data = convertMENUS(MENUS);
+          } catch (e) {
+            console.warn("MENUS convert failed", e);
+          }
+        }
+        // 2) menu.json fallback
+        if (!data) {
+          try {
+            const r = await fetch(CONFIG.MENU_URL, { cache: "no-store" });
+            if (r.ok) data = await r.json();
+          } catch (e) {
+            /* fall back below */
+          }
+        }
+        // 3) built-in default
+        if (!data || !Array.isArray(data.children)) data = DEFAULT_MENU;
+        MENU = normalise(data, data.name || "Menu", "#3a86ff");
+        topCats = MENU.children;
+      }
+
+      /* ============================================================
    5. RENDER : money helpers
    ============================================================ */
-const money = n => CONFIG.CURRENCY + (Math.round(n*100)/100).toFixed(2);
+      const money = (n) =>
+        CONFIG.CURRENCY + (Math.round(n * 100) / 100).toFixed(2);
 
-/* ----- top-level category sidebar (far right) ----- */
-function renderCats(){
-  const el = document.getElementById("cats");
-  el.innerHTML = "";
-  topCats.forEach((c,i)=>{
-    const b = document.createElement("button");
-    b.className = "cat-btn" + (i===activeTopIndex?" active":"");
-    b.style.background = `linear-gradient(160deg, ${tint(c._color,18)}, ${c._color})`;
-    b.textContent = c.name;
-    b.onclick = ()=>{ activeTopIndex=i; renderCats(); renderGrid(); };
-    el.appendChild(b);
-  });
-}
+      /* ----- top-level category sidebar (far right) ----- */
+      function renderCats() {
+        const el = document.getElementById("cats");
+        el.innerHTML = "";
+        topCats.forEach((c, i) => {
+          const b = document.createElement("button");
+          b.className = "cat-btn" + (i === activeTopIndex ? " active" : "");
+          b.style.background = `linear-gradient(160deg, ${tint(c._color, 18)}, ${c._color})`;
+          b.innerHTML =
+            (c.icon ? `<span class="cat-ico">${c.icon}</span>` : "") +
+            esc(c.name);
+          b.onclick = () => {
+            activeTopIndex = i;
+            renderCats();
+            renderGrid();
+          };
+          el.appendChild(b);
+        });
+      }
 
-/* ----- main grid : children of active top category ----- */
-function renderGrid(){
-  const cat = topCats[activeTopIndex];
-  document.getElementById("gridTitle").textContent = cat ? cat.name : "Menu";
-  const sw = document.getElementById("gridSwatch");
-  if(cat){ sw.style.display="inline-block"; sw.style.background=cat._color; } else sw.style.display="none";
-  const g = document.getElementById("grid"); g.innerHTML="";
-  if(!cat || !cat.children?.length){
-    g.innerHTML = '<div class="placeholder">Pick a category on the right to get started.</div>'; return;
-  }
-  cat.children.forEach(node => g.appendChild(makeTile(node, ()=>{
-    if(node._isItem) addItem(node);
-    else openCategory(node);
-  })));
-}
+      /* ----- main grid : children of active top category ----- */
+      function renderGrid() {
+        const cat = topCats[activeTopIndex];
+        document.getElementById("gridTitle").textContent = cat
+          ? cat.name
+          : "Menu";
+        const sw = document.getElementById("gridSwatch");
+        if (cat) {
+          sw.style.display = "inline-block";
+          sw.style.background = cat._color;
+        } else sw.style.display = "none";
+        const g = document.getElementById("grid");
+        g.innerHTML = "";
+        if (!cat || !cat.children?.length) {
+          g.innerHTML =
+            '<div class="placeholder">Pick a category on the right to get started.</div>';
+          return;
+        }
+        cat.children.forEach((node) =>
+          g.appendChild(
+            makeTile(node, () => {
+              if (node._isItem) chooseItem(node);
+              else openCategory(node);
+            }),
+          ),
+        );
+      }
 
-/* a tile is either a category (chevron, opens) or an item (price, adds) */
-function makeTile(node, onClick){
-  const t = document.createElement("button");
-  t.className = "tile " + (node._isItem ? "item" : "cat");
-  t.style.background = `linear-gradient(160deg, ${tint(node._color,16)}, ${node._color})`;
-  const name = document.createElement("div"); name.className="t-name"; name.textContent=node.name; t.appendChild(name);
-  if(node._isItem){
-    const p=document.createElement("div"); p.className="price"; p.textContent=money(node.price); t.appendChild(p);
-  } else {
-    const ch=document.createElement("div"); ch.className="chev"; ch.textContent="›"; t.appendChild(ch);
-  }
-  t.onclick = ()=>{ if(node._isItem){ t.classList.remove("flash"); void t.offsetWidth; t.classList.add("flash"); } onClick(); };
-  return t;
-}
+      /* dietary badge + options helpers */
+      function dietClass(t) {
+        t = ("" + t).toUpperCase();
+        if (/^(V|VG|VE|VGA|VEG)/.test(t)) return "veg";
+        if (/^GF/.test(t)) return "gf";
+        return "";
+      }
+      function dietaryBadges(tags) {
+        if (!tags || !tags.length) return "";
+        return `<div class="diet">${tags.map((t) => `<span class="dg ${dietClass(t)}">${esc(t)}</span>`).join("")}</div>`;
+      }
+      function hasOptions(node) {
+        return !!(node.choices || node.scoopBuilder);
+      }
 
-/* lighten a hex colour by pct for the gradient top */
-function tint(hex, pct){
-  const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255;
-  r=Math.min(255,r+Math.round(255*pct/100)); g=Math.min(255,g+Math.round(255*pct/100)); b=Math.min(255,b+Math.round(255*pct/100));
-  return `rgb(${r},${g},${b})`;
-}
+      /* a tile is either a category (chevron, opens) or an item (adds / opens options) */
+      function makeTile(node, onClick) {
+        const t = document.createElement("button");
+        t.className = "tile " + (node._isItem ? "item" : "cat");
+        t.style.background = `linear-gradient(160deg, ${tint(node._color, 16)}, ${node._color})`;
+        let inner = `<div class="t-name">${esc(node.name)}</div>`;
+        if (node._isItem) {
+          inner += `<div class="t-foot">`;
+          if (typeof node.price === "number")
+            inner += `<span class="price">${money(node.price)}${node.scoopBuilder ? " /scoop" : ""}</span>`;
+          inner += dietaryBadges(node.dietary);
+          inner += `</div>`;
+          if (hasOptions(node)) inner += `<div class="opt-ico">⚙</div>`;
+        } else {
+          inner += `<div class="chev">›</div>`;
+        }
+        t.innerHTML = inner;
+        t.onclick = () => {
+          if (node._isItem) {
+            t.classList.remove("flash");
+            void t.offsetWidth;
+            t.classList.add("flash");
+          }
+          onClick();
+        };
+        return t;
+      }
 
-/* ============================================================
+      /* decide what tapping an item does */
+      function chooseItem(node) {
+        if (hasOptions(node)) openModifiers(node);
+        else addLine(node, null, null);
+      }
+
+      /* lighten a hex colour by pct for the gradient top */
+      function tint(hex, pct) {
+        const n = parseInt(hex.slice(1), 16);
+        let r = n >> 16,
+          g = (n >> 8) & 255,
+          b = n & 255;
+        r = Math.min(255, r + Math.round((255 * pct) / 100));
+        g = Math.min(255, g + Math.round((255 * pct) / 100));
+        b = Math.min(255, b + Math.round((255 * pct) / 100));
+        return `rgb(${r},${g},${b})`;
+      }
+
+      /* ============================================================
    6. CATEGORY MODAL (deep nesting + red return button)
    navStack holds the chain of categories we've drilled into.
    ============================================================ */
-let navStack = [];
-function openCategory(node){ navStack=[node]; renderModal(); showOverlay(); }
-function modalBack(){ navStack.pop(); if(navStack.length===0) hideOverlay(); else renderModal(); }
-function renderModal(){
-  const cur = navStack[navStack.length-1];
-  const crumb = navStack.map(n=>n.name).join(" › ");
-  const ov = document.getElementById("overlay");
-  ov.innerHTML = `
+      let navStack = [];
+      function openCategory(node) {
+        navStack = [node];
+        renderModal();
+        showOverlay();
+      }
+      function modalBack() {
+        navStack.pop();
+        if (navStack.length === 0) hideOverlay();
+        else renderModal();
+      }
+      function renderModal() {
+        const cur = navStack[navStack.length - 1];
+        const crumb = navStack.map((n) => n.name).join(" › ");
+        const ov = document.getElementById("overlay");
+        ov.innerHTML = `
     <div class="modal">
       <div class="return-bar">
         <button class="return-btn" id="retBtn">⟵ Return</button>
-        <div class="crumb"><b>${esc(cur.name)}</b>${navStack.length>1 ? " — "+esc(crumb) : ""}</div>
+        <div class="crumb"><b>${esc(cur.name)}</b>${navStack.length > 1 ? " — " + esc(crumb) : ""}</div>
       </div>
       <div class="modal-grid" id="modalGrid"></div>
     </div>`;
-  ov.querySelector("#retBtn").onclick = modalBack;
-  const mg = ov.querySelector("#modalGrid");
-  (cur.children||[]).forEach(node => mg.appendChild(makeTile(node, ()=>{
-    if(node._isItem) addItem(node);
-    else { navStack.push(node); renderModal(); }
-  })));
-}
+        ov.querySelector("#retBtn").onclick = modalBack;
+        const mg = ov.querySelector("#modalGrid");
+        (cur.children || []).forEach((node) =>
+          mg.appendChild(
+            makeTile(node, () => {
+              if (node._isItem) chooseItem(node);
+              else {
+                navStack.push(node);
+                renderModal();
+              }
+            }),
+          ),
+        );
+      }
 
-/* ============================================================
+      /* ============================================================
    7. BILL / ORDER
    ============================================================ */
-function addItem(node){
-  const line = order.find(o=>o.id===node._path);
-  if(line) line.qty++;
-  else order.push({id:node._path, name:node.name, price:node.price, qty:1});
-  renderBill(); scheduleSave(); toast(node.name+" added");
-}
-function changeQty(id, delta){
-  const line = order.find(o=>o.id===id); if(!line) return;
-  line.qty += delta;
-  if(line.qty<=0) order = order.filter(o=>o.id!==id);
-  renderBill(); scheduleSave();
-}
-function renderBill(){
-  const list = document.getElementById("billList");
-  if(order.length===0){
-    list.innerHTML = '<div class="bill-empty">No items yet.<br>Tap the menu to add to this order.</div>';
-  } else {
-    list.innerHTML = "";
-    order.forEach(o=>{
-      const row=document.createElement("div"); row.className="line";
-      row.innerHTML = `
+      /* ----- modifier dialog (choices + scoop builder) ----- */
+      let modState = null;
+      function openModifiers(node) {
+        modState = { node, sel: {}, scoops: [] };
+        if (node.choices)
+          for (const g in node.choices) modState.sel[g] = node.choices[g][0]; // default first
+        renderModifiers();
+        document.getElementById("overlay2").classList.add("show");
+      }
+      function closeModifiers() {
+        const o = document.getElementById("overlay2");
+        o.classList.remove("show");
+        o.innerHTML = "";
+        modState = null;
+      }
+      function renderModifiers() {
+        const { node, sel, scoops } = modState;
+        let groups = "";
+        if (node.choices) {
+          for (const g in node.choices) {
+            groups +=
+              `<div class="mg"><div class="mg-h">${esc(g)}</div><div class="mg-opts">` +
+              node.choices[g]
+                .map(
+                  (opt) =>
+                    `<button class="opt${sel[g] === opt ? " on" : ""}" data-g="${esc(g)}" data-o="${esc(opt)}">${esc(opt)}</button>`,
+                )
+                .join("") +
+              `</div></div>`;
+          }
+        }
+        if (node.scoopBuilder) {
+          const max = node.scoopBuilder.maxScoops || 1;
+          groups +=
+            `<div class="mg"><div class="mg-h">Flavours <span class="mg-cnt">${scoops.length}/${max}</span></div><div class="mg-opts">` +
+            node.scoopBuilder.flavours
+              .map(
+                (f) =>
+                  `<button class="opt${scoops.includes(f) ? " on" : ""}" data-scoop="${esc(f)}">${esc(f)}</button>`,
+              )
+              .join("") +
+            `</div></div>`;
+        }
+        let price = null;
+        if (node.scoopBuilder) price = (node.price || 0) * scoops.length;
+        else if (typeof node.price === "number") price = node.price;
+
+        const ov = document.getElementById("overlay2");
+        ov.innerHTML = `
+    <div class="modal narrow">
+      <div class="return-bar">
+        <button class="return-btn" id="modCancel">⟵ Cancel</button>
+        <div class="crumb"><b>${esc(node.name)}</b></div>
+      </div>
+      <div class="mod-body">${groups || '<div class="tabs-empty">No options.</div>'}</div>
+      <div class="modal-foot mod-foot">
+        <div class="mod-price">${price != null ? money(price) : "—"}</div>
+        <button class="mod-add" id="modAdd">Add ＋</button>
+      </div>
+    </div>`;
+        ov.querySelector("#modCancel").onclick = closeModifiers;
+        ov.querySelector("#modAdd").onclick = confirmModifiers;
+        ov.querySelectorAll(".opt").forEach((b) => {
+          b.onclick = () => {
+            if (b.dataset.scoop !== undefined) {
+              const f = b.dataset.scoop,
+                i = scoops.indexOf(f);
+              if (i >= 0) scoops.splice(i, 1);
+              else if (scoops.length < (node.scoopBuilder.maxScoops || 1))
+                scoops.push(f);
+              else toast("Max " + node.scoopBuilder.maxScoops + " scoops");
+            } else {
+              sel[b.dataset.g] = b.dataset.o;
+            }
+            renderModifiers();
+          };
+        });
+      }
+      function confirmModifiers() {
+        const { node, sel, scoops } = modState;
+        if (node.scoopBuilder && scoops.length === 0) {
+          toast("Pick at least one flavour");
+          return;
+        }
+        addLine(
+          node,
+          node.choices ? { ...sel } : null,
+          node.scoopBuilder ? scoops.slice() : null,
+        );
+        closeModifiers();
+      }
+
+      /* ----- order lines ----- */
+      function lineId(node, mods, scoops) {
+        return (
+          node._path +
+          "::" +
+          (mods ? JSON.stringify(mods) : "") +
+          "::" +
+          (scoops ? scoops.join(",") : "")
+        );
+      }
+      function addLine(node, mods, scoops) {
+        const id = lineId(node, mods, scoops);
+        const priced = typeof node.price === "number";
+        let price = priced ? node.price : 0;
+        if (node.scoopBuilder && scoops)
+          price = (node.price || 0) * scoops.length;
+        const line = order.find((o) => o.id === id);
+        if (line) line.qty++;
+        else
+          order.push({
+            id,
+            name: node.name,
+            price,
+            qty: 1,
+            priced,
+            mods: mods || null,
+            scoops: scoops || null,
+          });
+        renderBill();
+        markDirty(true);
+        toast(node.name + " added");
+      }
+      function changeQty(id, delta) {
+        const line = order.find((o) => o.id === id);
+        if (!line) return;
+        line.qty += delta;
+        if (line.qty <= 0) order = order.filter((o) => o.id !== id);
+        renderBill();
+        markDirty(true);
+      }
+      function lineSub(o) {
+        const bits = [];
+        if (o.scoops && o.scoops.length) bits.push(o.scoops.join(", "));
+        if (o.mods) for (const k in o.mods) bits.push(o.mods[k]);
+        const opt = bits.length
+          ? `<div class="ln-opt">${esc(bits.join(" · "))}</div>`
+          : "";
+        const each = o.priced
+          ? `<div class="each">${money(o.price)} each</div>`
+          : `<div class="each">no price set</div>`;
+        return opt + each;
+      }
+      function renderBill() {
+        const list = document.getElementById("billList");
+        if (order.length === 0) {
+          list.innerHTML =
+            '<div class="bill-empty">No items yet.<br>Tap the menu to add to this order.</div>';
+        } else {
+          list.innerHTML = "";
+          order.forEach((o) => {
+            const row = document.createElement("div");
+            row.className = "line";
+            row.innerHTML = `
         <div class="stepper">
           <button class="minus">–</button><span class="qty">${o.qty}</span><button class="plus">+</button>
         </div>
-        <div><div class="name">${esc(o.name)}</div><div class="each">${money(o.price)} each</div></div>
-        <div class="total">${money(o.price*o.qty)}</div>`;
-      row.querySelector(".minus").onclick=()=>changeQty(o.id,-1);
-      row.querySelector(".plus").onclick=()=>changeQty(o.id,1);
-      list.appendChild(row);
-    });
-  }
-  const total = order.reduce((s,o)=>s+o.price*o.qty,0);
-  const count = order.reduce((s,o)=>s+o.qty,0);
-  document.getElementById("billTotal").textContent = money(total);
-  document.getElementById("billCount").textContent = count ? `· ${count} item${count>1?"s":""}` : "";
-  const badge=document.getElementById("tabBadge");
-  if(activeTab){ badge.textContent="Tab "+activeTab; badge.className="tab-badge"; }
-  else { badge.textContent="No tab"; badge.className="tab-badge none"; }
-}
+        <div class="ln-mid"><div class="name">${esc(o.name)}</div>${lineSub(o)}</div>
+        <div class="total">${o.priced ? money(o.price * o.qty) : "—"}</div>`;
+            row.querySelector(".minus").onclick = () => changeQty(o.id, -1);
+            row.querySelector(".plus").onclick = () => changeQty(o.id, 1);
+            list.appendChild(row);
+          });
+        }
+        const total = order.reduce((s, o) => s + o.price * o.qty, 0);
+        const count = order.reduce((s, o) => s + o.qty, 0);
+        document.getElementById("billTotal").textContent = money(total);
+        document.getElementById("billCount").textContent = count
+          ? `· ${count} item${count > 1 ? "s" : ""}`
+          : "";
+        document.getElementById("billNote").textContent = order.some(
+          (o) => !o.priced,
+        )
+          ? "Total excludes items with no price set in the menu."
+          : "";
+        updateBadge();
+      }
 
-/* save active tab (debounced) */
-function scheduleSave(){
-  if(activeTab===null) return;
-  setStatus("saving");
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(async ()=>{
-    try{ await store.saveTab(activeTab, order); setStatus("ok"); }
-    catch(e){ setStatus("err"); toast("Save failed — check connection"); }
-  }, 500);
-}
+      /* ----- manual save (writes to the DB only when Save is pressed) ----- */
+      function updateBadge() {
+        const badge = document.getElementById("tabBadge");
+        if (!badge) return;
+        if (activeTab) {
+          badge.textContent = "Tab " + activeTab + (dirty ? " • unsaved" : "");
+          badge.className = "tab-badge" + (dirty ? " unsaved" : "");
+        } else {
+          badge.textContent = order.length ? "Unsaved order" : "No tab";
+          badge.className = "tab-badge none";
+        }
+      }
+      function markDirty(d) {
+        dirty = d;
+        const b = document.getElementById("saveBtn");
+        if (b) b.classList.toggle("dirty", d);
+        updateBadge();
+      }
+      function confirmDiscard() {
+        return (
+          !dirty || confirm("This order has unsaved changes. Discard them?")
+        );
+      }
+      async function saveNow() {
+        if (activeTab === null) {
+          toast("Tap “Tab” to open a tab first, then Save");
+          return;
+        }
+        if (!dirty) {
+          toast("Nothing to save");
+          return;
+        }
+        setStatus("saving");
+        try {
+          await store.saveTab(activeTab, order);
+          tabPersisted = true;
+          markDirty(false);
+          setStatus("ok");
+          toast("Tab " + activeTab + " saved");
+        } catch (e) {
+          setStatus("err");
+          toast("Save failed — check connection");
+        }
+      }
 
-/* ============================================================
+      /* ============================================================
    8. TAB ACTIONS  (keypad / open tabs / clear)
    ============================================================ */
-let kpValue = "";
-function openKeypad(){
-  kpValue="";
-  const ov=document.getElementById("overlay");
-  ov.innerHTML = `
+      let kpValue = "";
+      function openKeypad() {
+        kpValue = "";
+        const ov = document.getElementById("overlay");
+        ov.innerHTML = `
     <div class="modal narrow">
       <div class="kp-head">Enter tab number</div>
       <div class="kp-display" id="kpDisp"><span class="ph">– –</span></div>
       <div class="kp" id="kp"></div>
       <div class="modal-foot"><button class="foot-close" id="kpCancel">Cancel</button></div>
     </div>`;
-  const kp=ov.querySelector("#kp");
-  ["1","2","3","4","5","6","7","8","9","del","0","ok"].forEach(k=>{
-    const b=document.createElement("button");
-    if(k==="del"){ b.className="del"; b.textContent="⌫"; }
-    else if(k==="ok"){ b.className="ok"; b.textContent="GO"; }
-    else b.textContent=k;
-    b.onclick=()=>kpPress(k);
-    kp.appendChild(b);
-  });
-  ov.querySelector("#kpCancel").onclick=hideOverlay;
-  showOverlay();
-}
-function kpPress(k){
-  if(k==="del") kpValue=kpValue.slice(0,-1);
-  else if(k==="ok"){ if(kpValue) selectTab(kpValue); return; }
-  else if(kpValue.length<6) kpValue+=k;
-  const d=document.getElementById("kpDisp");
-  d.innerHTML = kpValue ? esc(kpValue) : '<span class="ph">– –</span>';
-}
+        const kp = ov.querySelector("#kp");
+        ["1", "2", "3", "4", "5", "6", "7", "8", "9", "del", "0", "ok"].forEach(
+          (k) => {
+            const b = document.createElement("button");
+            if (k === "del") {
+              b.className = "del";
+              b.textContent = "⌫";
+            } else if (k === "ok") {
+              b.className = "ok";
+              b.textContent = "GO";
+            } else b.textContent = k;
+            b.onclick = () => kpPress(k);
+            kp.appendChild(b);
+          },
+        );
+        ov.querySelector("#kpCancel").onclick = hideOverlay;
+        showOverlay();
+      }
+      function kpPress(k) {
+        if (k === "del") kpValue = kpValue.slice(0, -1);
+        else if (k === "ok") {
+          if (kpValue) selectTab(kpValue);
+          return;
+        } else if (kpValue.length < 6) kpValue += k;
+        const d = document.getElementById("kpDisp");
+        d.innerHTML = kpValue ? esc(kpValue) : '<span class="ph">– –</span>';
+      }
 
-/* choose / create a tab */
-async function selectTab(number){
-  hideOverlay(); setStatus("saving");
-  try{
-    const existing = await store.getTab(number);
-    if(existing && existing.items && existing.items.length){
-      order = existing.items.map(i=>({...i}));   // load existing tab
-      toast("Tab "+number+" loaded");
-    } else {
-      await store.saveTab(number, order);          // new tab seeded with current order
-      toast("Tab "+number+" started");
-    }
-    activeTab = number;
-    renderBill(); setStatus("ok");
-  }catch(e){ setStatus("err"); toast("Couldn't open tab — check connection"); }
-}
+      /* choose / open a tab. Existing tab = one read + load. New number = local only
+   (nothing is written until Save is pressed). */
+      async function selectTab(number) {
+        hideOverlay();
+        setStatus("saving");
+        let existing = null;
+        try {
+          existing = await store.getTab(number);
+        } catch (e) {
+          setStatus("err");
+          toast("Couldn't reach the tab — check connection");
+          return;
+        }
+        if (existing && existing.items && existing.items.length) {
+          if (!confirmDiscard()) {
+            setStatus("ok");
+            return;
+          } // loading replaces the current order
+          order = existing.items.map((i) => ({ ...i }));
+          activeTab = number;
+          tabPersisted = true;
+          markDirty(false);
+          toast("Tab " + number + " loaded");
+        } else {
+          activeTab = number;
+          tabPersisted = false; // brand-new tab holds the current order
+          markDirty(order.length > 0);
+          toast("Tab " + number + " started — press Save to store it");
+        }
+        renderBill();
+        setStatus("ok");
+      }
 
-async function openTabs(){
-  const ov=document.getElementById("overlay");
-  ov.innerHTML = `
+      async function openTabs() {
+        const ov = document.getElementById("overlay");
+        ov.innerHTML = `
     <div class="modal">
       <div class="return-bar">
         <button class="return-btn" id="otClose">⟵ Return</button>
@@ -673,90 +1929,182 @@ async function openTabs(){
       </div>
       <div class="tabs-list" id="tabsList"><div class="tabs-empty">Loading…</div></div>
     </div>`;
-  ov.querySelector("#otClose").onclick=hideOverlay;
-  showOverlay();
-  let tabs=[];
-  try{ tabs = await store.listTabs(); }
-  catch(e){ ov.querySelector("#tabsList").innerHTML='<div class="tabs-empty">Couldn\'t load tabs.<br>Check your connection.</div>'; return; }
-  const list=ov.querySelector("#tabsList");
-  if(!tabs.length){ list.innerHTML='<div class="tabs-empty">No open tabs.<br>Start one with the Tab button.</div>'; return; }
-  list.innerHTML="";
-  tabs.forEach(t=>{
-    const count=(t.items||[]).reduce((s,i)=>s+i.qty,0);
-    const row=document.createElement("div"); row.className="tab-row";
-    row.innerHTML = `
-      <div class="num">${esc(""+t.number)}</div>
-      <div class="meta"><div class="tt">${money(t.total||0)}</div><div class="ti">${count} item${count!==1?"s":""}</div></div>
+        ov.querySelector("#otClose").onclick = hideOverlay;
+        showOverlay();
+        let tabs = [];
+        try {
+          tabs = await store.listTabs();
+        } catch (e) {
+          ov.querySelector("#tabsList").innerHTML =
+            '<div class="tabs-empty">Couldn\'t load tabs.<br>Check your connection.</div>';
+          return;
+        }
+        lastTabsList = tabs; // cache so loadTab() doesn't re-read the DB
+        const list = ov.querySelector("#tabsList");
+        if (!tabs.length) {
+          list.innerHTML =
+            '<div class="tabs-empty">No open tabs.<br>Start one with the Tab button.</div>';
+          return;
+        }
+        list.innerHTML = "";
+        tabs.forEach((t) => {
+          const count = (t.items || []).reduce((s, i) => s + i.qty, 0);
+          const row = document.createElement("div");
+          row.className = "tab-row";
+          row.innerHTML = `
+      <div class="num">${esc("" + t.number)}</div>
+      <div class="meta"><div class="tt">${money(t.total || 0)}</div><div class="ti">${count} item${count !== 1 ? "s" : ""}</div></div>
       <button class="del">✕</button>`;
-    row.querySelector(".meta").onclick = ()=>loadTab(t.number);
-    row.querySelector(".num").onclick  = ()=>loadTab(t.number);
-    row.querySelector(".del").onclick  = async (e)=>{
-      e.stopPropagation();
-      if(!confirm("Close tab "+t.number+"? This removes it.")) return;
-      try{ await store.deleteTab(t.number); if(activeTab===t.number){activeTab=null; order=[]; renderBill();} openTabs(); }
-      catch(err){ toast("Delete failed"); }
-    };
-    list.appendChild(row);
-  });
-}
-async function loadTab(number){
-  hideOverlay();
-  try{
-    const t = await store.getTab(number);
-    order = (t?.items||[]).map(i=>({...i}));
-    activeTab = number; renderBill(); setStatus("ok"); toast("Tab "+number+" loaded");
-  }catch(e){ setStatus("err"); toast("Couldn't load tab"); }
-}
+          row.querySelector(".meta").onclick = () => loadTab(t.number);
+          row.querySelector(".num").onclick = () => loadTab(t.number);
+          row.querySelector(".del").onclick = async (e) => {
+            e.stopPropagation();
+            if (!confirm("Close tab " + t.number + "? This removes it."))
+              return;
+            try {
+              await store.deleteTab(t.number);
+              if (activeTab === t.number) {
+                activeTab = null;
+                order = [];
+                renderBill();
+              }
+              openTabs();
+            } catch (err) {
+              toast("Delete failed");
+            }
+          };
+          list.appendChild(row);
+        });
+      }
+      function loadTab(number) {
+        if (!confirmDiscard()) return;
+        hideOverlay();
+        const cached = lastTabsList.find(
+          (t) => String(t.number) === String(number),
+        );
+        order = (cached?.items || []).map((i) => ({ ...i }));
+        activeTab = number;
+        tabPersisted = true;
+        markDirty(false);
+        renderBill();
+        setStatus("ok");
+        toast("Tab " + number + " loaded");
+      }
 
-function clearTab(){
-  if(activeTab!==null){
-    if(!confirm("Clear tab "+activeTab+"? This empties and closes it.")) return;
-    store.deleteTab(activeTab).catch(()=>{});
-  } else if(order.length){
-    if(!confirm("Clear the current order?")) return;
-  }
-  activeTab=null; order=[]; renderBill(); setStatus("ok");
-}
+      function clearTab() {
+        if (activeTab !== null) {
+          if (
+            !confirm("Clear tab " + activeTab + "? This empties and closes it.")
+          )
+            return;
+          if (tabPersisted) store.deleteTab(activeTab).catch(() => {}); // only a write if it was ever saved
+        } else if (order.length) {
+          if (!confirm("Clear the current order?")) return;
+        }
+        activeTab = null;
+        order = [];
+        tabPersisted = false;
+        markDirty(false);
+        renderBill();
+        setStatus("ok");
+      }
 
-/* ============================================================
+      /* ============================================================
    9. UI PLUMBING
    ============================================================ */
-function esc(s){ return (""+s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-function showOverlay(){ document.getElementById("overlay").classList.add("show"); }
-function hideOverlay(){ const o=document.getElementById("overlay"); o.classList.remove("show"); o.innerHTML=""; navStack=[]; }
-document.getElementById("overlay").addEventListener("click",e=>{ if(e.target.id==="overlay") hideOverlay(); });
+      function esc(s) {
+        return ("" + s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+      function showOverlay() {
+        document.getElementById("overlay").classList.add("show");
+      }
+      function hideOverlay() {
+        const o = document.getElementById("overlay");
+        o.classList.remove("show");
+        o.innerHTML = "";
+        navStack = [];
+      }
+      document.getElementById("overlay").addEventListener("click", (e) => {
+        if (e.target.id === "overlay") hideOverlay();
+      });
+      document.getElementById("overlay2").addEventListener("click", (e) => {
+        if (e.target.id === "overlay2") closeModifiers();
+      });
 
-let toastTimer=null;
-function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show");
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),1400); }
+      let toastTimer = null;
+      function toast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove("show"), 1400);
+      }
 
-function setStatus(s){
-  const dot=document.getElementById("statusDot"), txt=document.getElementById("statusText");
-  if(s==="ok"){ dot.className="dot "+(backend==="remote"?"synced":"local"); txt.textContent=(backend==="remote"?"Synced":"On-device"); }
-  else if(s==="saving"){ dot.className="dot"; txt.textContent="Saving…"; }
-  else if(s==="err"){ dot.className="dot err"; txt.textContent="Offline"; }
-}
+      function setStatus(s) {
+        const dot = document.getElementById("statusDot"),
+          txt = document.getElementById("statusText");
+        if (s === "ok") {
+          dot.className = "dot " + (backend === "remote" ? "synced" : "local");
+          txt.textContent = backend === "remote" ? "Synced" : "On-device";
+        } else if (s === "saving") {
+          dot.className = "dot";
+          txt.textContent = "Saving…";
+        } else if (s === "err") {
+          dot.className = "dot err";
+          txt.textContent = "Offline";
+        }
+      }
 
-/* fullscreen + landscape lock (best-effort; full lock needs PWA/kiosk) */
-document.getElementById("fsBtn").onclick = async ()=>{
-  try{ if(!document.fullscreenElement) await document.documentElement.requestFullscreen(); else await document.exitFullscreen(); }catch(e){}
-  try{ await screen.orientation.lock("landscape"); }catch(e){}
-};
+      /* fullscreen + landscape lock (best-effort; full lock needs PWA/kiosk) */
+      document.getElementById("fsBtn").onclick = async () => {
+        try {
+          if (!document.fullscreenElement)
+            await document.documentElement.requestFullscreen();
+          else await document.exitFullscreen();
+        } catch (e) {}
+        try {
+          await screen.orientation.lock("landscape");
+        } catch (e) {}
+      };
 
-/* ============================================================
+      /* ============================================================
    10. INIT
    ============================================================ */
-async function init(){
-  document.getElementById("tabBtn").onclick   = openKeypad;
-  document.getElementById("openBtn").onclick  = openTabs;
-  document.getElementById("clearBtn").onclick = clearTab;
-  setStatus("saving");
-  await loadMenu();
-  renderCats(); renderGrid(); renderBill();
-  setStatus("ok");
-  if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("sw.js"); }catch(e){} }
-}
-init();
-</script>
-</body>
+      async function init() {
+        document.getElementById("tabBtn").onclick = openKeypad;
+        document.getElementById("openBtn").onclick = openTabs;
+        document.getElementById("saveBtn").onclick = saveNow;
+        document.getElementById("clearBtn").onclick = clearTab;
+        window.addEventListener("beforeunload", (e) => {
+          if (dirty) {
+            e.preventDefault();
+            e.returnValue = "";
+          }
+        });
+        setStatus("saving");
+        await loadMenu();
+        renderCats();
+        renderGrid();
+        renderBill();
+        markDirty(false);
+        setStatus("ok");
+        if ("serviceWorker" in navigator) {
+          try {
+            navigator.serviceWorker.register("sw.js");
+          } catch (e) {}
+        }
+      }
+      init();
+    </script>
+  </body>
 </html>
