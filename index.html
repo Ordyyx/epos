@@ -269,7 +269,7 @@
       .line {
         display: grid;
         grid-template-columns: auto 1fr auto;
-        align-items: center;
+        align-items: start;
         gap: 10px;
         padding: 9px 8px;
         border-radius: 10px;
@@ -933,6 +933,77 @@
         padding: 0;
       }
 
+      .rm-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: #2a1418;
+        color: var(--danger);
+        border: 1px solid #4a1f26;
+        font-size: 16px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        margin-top: 1px;
+      }
+      .rm-btn:active {
+        transform: translateY(1px);
+      }
+      .ln-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 5px;
+      }
+      .note-btn {
+        font-size: 12px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        color: var(--text-faint);
+        line-height: 1;
+      }
+      .note-btn.has-note {
+        color: var(--warn);
+        border-color: #5a3a14;
+        background: #3a2410;
+      }
+      .ln-note {
+        font-size: 11px;
+        color: var(--warn);
+        font-weight: 600;
+        line-height: 1.25;
+        margin-top: 1px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .note-body {
+        padding: 16px;
+      }
+      .note-input {
+        width: 100%;
+        min-height: 100px;
+        background: #0c1119;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: var(--text);
+        font-family: var(--font);
+        font-size: 16px;
+        font-weight: 600;
+        padding: 14px;
+        resize: none;
+        outline: none;
+        -webkit-user-select: text;
+        user-select: text;
+      }
+      .note-input:focus {
+        border-color: var(--accent);
+      }
+
       /* modifier dialog */
       .mod-body {
         flex: 1 1 auto;
@@ -1145,7 +1216,7 @@
               items: o[n].items,
               updatedAt: o[n].updatedAt,
               total: (o[n].items || []).reduce(
-                (s, i) => s + i.price * i.qty,
+                (s, i) => s + (i.price || 0),
                 0,
               ),
             }))
@@ -1210,6 +1281,7 @@
       let dirty = false; // are there unsaved local changes?
       let tabPersisted = false; // has the active tab been written to the DB yet?
       let lastTabsList = []; // cached from Open Tabs so loading needs no extra read
+      let lineCounter = 0;
 
       /* ============================================================
    4. MENU LOADING + NORMALISATION
@@ -1624,8 +1696,6 @@
       let modState = null;
       function openModifiers(node) {
         modState = { node, sel: {}, scoops: [] };
-        if (node.choices)
-          for (const g in node.choices) modState.sel[g] = node.choices[g][0]; // default first
         renderModifiers();
         document.getElementById("overlay2").classList.add("show");
       }
@@ -1634,6 +1704,43 @@
         o.classList.remove("show");
         o.innerHTML = "";
         modState = null;
+      }
+      function openNoteDialog(id) {
+        const item = order.find((o) => o.id === id);
+        if (!item) return;
+        const ov = document.getElementById("overlay2");
+        ov.innerHTML = `
+    <div class="modal narrow">
+      <div class="return-bar">
+        <button class="return-btn" id="noteCancel">⟵ Cancel</button>
+        <div class="crumb"><b>${esc(item.name)}</b> — Note</div>
+      </div>
+      <div class="note-body">
+        <textarea class="note-input" id="noteInput" placeholder="e.g. No onions, extra sauce…">${esc(item.note || "")}</textarea>
+      </div>
+      <div class="modal-foot mod-foot">
+        <button class="foot-close" id="noteClear" style="flex:0 0 auto;width:auto;padding:0 18px">Clear</button>
+        <button class="mod-add" id="noteSave">Save Note</button>
+      </div>
+    </div>`;
+        ov.classList.add("show");
+        ov.querySelector("#noteCancel").onclick = closeNoteDialog;
+        ov.querySelector("#noteClear").onclick = () => {
+          ov.querySelector("#noteInput").value = "";
+        };
+        ov.querySelector("#noteSave").onclick = () => {
+          const val = ov.querySelector("#noteInput").value.trim();
+          item.note = val || null;
+          renderBill();
+          markDirty(true);
+          closeNoteDialog();
+        };
+        setTimeout(() => ov.querySelector("#noteInput")?.focus(), 50);
+      }
+      function closeNoteDialog() {
+        const o = document.getElementById("overlay2");
+        o.classList.remove("show");
+        o.innerHTML = "";
       }
       function renderModifiers() {
         const { node, sel, scoops } = modState;
@@ -1704,65 +1811,52 @@
           toast("Pick at least one flavour");
           return;
         }
+        const mods = node.choices
+          ? Object.fromEntries(Object.entries(sel).filter(([, v]) => v != null))
+          : null;
         addLine(
           node,
-          node.choices ? { ...sel } : null,
+          mods && Object.keys(mods).length ? mods : null,
           node.scoopBuilder ? scoops.slice() : null,
         );
         closeModifiers();
       }
 
       /* ----- order lines ----- */
-      function lineId(node, mods, scoops) {
-        return (
-          node._path +
-          "::" +
-          (mods ? JSON.stringify(mods) : "") +
-          "::" +
-          (scoops ? scoops.join(",") : "")
-        );
-      }
       function addLine(node, mods, scoops) {
-        const id = lineId(node, mods, scoops);
         const priced = typeof node.price === "number";
         let price = priced ? node.price : 0;
         if (node.scoopBuilder && scoops)
           price = (node.price || 0) * scoops.length;
-        const line = order.find((o) => o.id === id);
-        if (line) line.qty++;
-        else
-          order.push({
-            id,
-            name: node.name,
-            price,
-            qty: 1,
-            priced,
-            mods: mods || null,
-            scoops: scoops || null,
-          });
+        order.push({
+          id: (++lineCounter) + "::" + node._path,
+          name: node.name,
+          price,
+          priced,
+          mods: mods || null,
+          scoops: scoops || null,
+          note: null,
+        });
         renderBill();
         markDirty(true);
         toast(node.name + " added");
       }
-      function changeQty(id, delta) {
-        const line = order.find((o) => o.id === id);
-        if (!line) return;
-        line.qty += delta;
-        if (line.qty <= 0) order = order.filter((o) => o.id !== id);
+      function removeLine(id) {
+        order = order.filter((o) => o.id !== id);
         renderBill();
         markDirty(true);
       }
       function lineSub(o) {
         const bits = [];
         if (o.scoops && o.scoops.length) bits.push(o.scoops.join(", "));
-        if (o.mods) for (const k in o.mods) bits.push(o.mods[k]);
+        if (o.mods) for (const k in o.mods) if (o.mods[k] != null) bits.push(o.mods[k]);
         const opt = bits.length
           ? `<div class="ln-opt">${esc(bits.join(" · "))}</div>`
           : "";
-        const each = o.priced
-          ? `<div class="each">${money(o.price)} each</div>`
-          : `<div class="each">no price set</div>`;
-        return opt + each;
+        const noteHtml = o.note
+          ? `<div class="ln-note">${esc(o.note)}</div>`
+          : "";
+        return opt + noteHtml;
       }
       function renderBill() {
         const list = document.getElementById("billList");
@@ -1775,18 +1869,19 @@
             const row = document.createElement("div");
             row.className = "line";
             row.innerHTML = `
-        <div class="stepper">
-          <button class="minus">–</button><span class="qty">${o.qty}</span><button class="plus">+</button>
-        </div>
+        <button class="rm-btn">✕</button>
         <div class="ln-mid"><div class="name">${esc(o.name)}</div>${lineSub(o)}</div>
-        <div class="total">${o.priced ? money(o.price * o.qty) : "—"}</div>`;
-            row.querySelector(".minus").onclick = () => changeQty(o.id, -1);
-            row.querySelector(".plus").onclick = () => changeQty(o.id, 1);
+        <div class="ln-right">
+          <div class="total">${o.priced ? money(o.price) : "—"}</div>
+          <button class="note-btn${o.note ? " has-note" : ""}">📝</button>
+        </div>`;
+            row.querySelector(".rm-btn").onclick = () => removeLine(o.id);
+            row.querySelector(".note-btn").onclick = () => openNoteDialog(o.id);
             list.appendChild(row);
           });
         }
-        const total = order.reduce((s, o) => s + o.price * o.qty, 0);
-        const count = order.reduce((s, o) => s + o.qty, 0);
+        const total = order.reduce((s, o) => s + o.price, 0);
+        const count = order.length;
         document.getElementById("billTotal").textContent = money(total);
         document.getElementById("billCount").textContent = count
           ? `· ${count} item${count > 1 ? "s" : ""}`
@@ -1886,6 +1981,26 @@
         d.innerHTML = kpValue ? esc(kpValue) : '<span class="ph">– –</span>';
       }
 
+      /* expand saved items (which may have qty from old format) into separate lines */
+      function expandItems(items) {
+        const result = [];
+        for (const i of items || []) {
+          const qty = i.qty || 1;
+          for (let q = 0; q < qty; q++) {
+            result.push({
+              id: (++lineCounter) + "::" + (i.name || "item"),
+              name: i.name,
+              price: i.price || 0,
+              priced: i.priced,
+              mods: i.mods || null,
+              scoops: i.scoops || null,
+              note: i.note || null,
+            });
+          }
+        }
+        return result;
+      }
+
       /* choose / open a tab. Existing tab = one read + load. New number = local only
    (nothing is written until Save is pressed). */
       async function selectTab(number) {
@@ -1904,7 +2019,7 @@
             setStatus("ok");
             return;
           } // loading replaces the current order
-          order = existing.items.map((i) => ({ ...i }));
+          order = expandItems(existing.items);
           activeTab = number;
           tabPersisted = true;
           markDirty(false);
@@ -1948,7 +2063,7 @@
         }
         list.innerHTML = "";
         tabs.forEach((t) => {
-          const count = (t.items || []).reduce((s, i) => s + i.qty, 0);
+          const count = (t.items || []).length;
           const row = document.createElement("div");
           row.className = "tab-row";
           row.innerHTML = `
@@ -1982,7 +2097,7 @@
         const cached = lastTabsList.find(
           (t) => String(t.number) === String(number),
         );
-        order = (cached?.items || []).map((i) => ({ ...i }));
+        order = expandItems(cached?.items || []);
         activeTab = number;
         tabPersisted = true;
         markDirty(false);
