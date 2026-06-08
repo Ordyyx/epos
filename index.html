@@ -1142,7 +1142,7 @@
             </div>
             <div class="row">
               <button class="bigbtn save" id="saveBtn">💾 Save</button>
-              <button class="bigbtn clear" id="clearBtn">Clear Tab</button>
+              <button class="bigbtn clear" id="clearBtn">Clear</button>
             </div>
           </div>
         </section>
@@ -2107,21 +2107,14 @@
       }
 
       function clearTab() {
-        if (activeTab !== null) {
-          if (
-            !confirm("Clear tab " + activeTab + "? This empties and closes it.")
-          )
-            return;
-          if (tabPersisted) store.deleteTab(activeTab).catch(() => {}); // only a write if it was ever saved
-        } else if (order.length) {
-          if (!confirm("Clear the current order?")) return;
+        if (!order.length) {
+          toast("Nothing to clear");
+          return;
         }
-        activeTab = null;
+        if (!confirm("Clear current items?")) return;
         order = [];
-        tabPersisted = false;
-        markDirty(false);
+        markDirty(activeTab !== null);
         renderBill();
-        setStatus("ok");
       }
 
       /* ============================================================
